@@ -1,20 +1,20 @@
 <?php
 
-require_once __DIR__ . '/../model/Hospede.php';
+require_once __DIR__ . '/../model/Funcionario.php';
 require_once __DIR__ . '/../model/Pessoa.php';
 require_once __DIR__ . '/../model/Endereco.php';
 require_once __DIR__ . '/../database/Database.php';
 
-class HospedeController {
+class FuncionarioController {
     private $db;
-    private $hospede;
+    private $funcionario;
     private $pessoa;
     private $endereco;
 
     public function __construct() {
         $database = new Database();
         $this->db = $database->getConnection();
-        $this->hospede = new Hospede($this->db);
+        $this->funcionario = new Funcionario($this->db);
         $this->pessoa = new Pessoa($this->db);
         $this->endereco = new Endereco($this->db);
     }
@@ -44,7 +44,7 @@ class HospedeController {
             $this->pessoa->setDocumento($dados['documento'] ?? null);
             $this->pessoa->setTelefone($dados['telefone'] ?? null);
             $this->pessoa->setEmail($dados['email'] ?? null);
-            $this->pessoa->setTipoPessoa('hospede');
+            $this->pessoa->setTipoPessoa('funcionario');
             $this->pessoa->setEnderecoId($this->endereco->getId());
 
             if (!$this->pessoa->create()) {
@@ -52,20 +52,29 @@ class HospedeController {
                 return ['sucesso' => false, 'erros' => ['Erro ao criar pessoa.']];
             }
 
-            // Criar hóspede
-            $this->hospede->setIdPessoa($this->pessoa->getId());
-            $this->hospede->setPreferencias($dados['preferencias'] ?? null);
-            $this->hospede->setHistorico($dados['historico'] ?? null);
+            // Criar funcionário
+            $this->funcionario->setIdPessoa($this->pessoa->getId());
+            $this->funcionario->setCargo($dados['cargo'] ?? null);
+            $this->funcionario->setSalario($dados['salario'] ?? null);
+            $this->funcionario->setDataContratacao($dados['data_contratacao'] ?? date('Y-m-d'));
+            $this->funcionario->setNumeroCtps($dados['numero_ctps'] ?? null);
+            $this->funcionario->setTurno($dados['turno'] ?? null);
 
-            if (!$this->hospede->create()) {
+            $erros = $this->funcionario->validar();
+            if (!empty($erros)) {
                 $this->db->rollBack();
-                return ['sucesso' => false, 'erros' => ['Erro ao criar hóspede.']];
+                return ['sucesso' => false, 'erros' => $erros];
+            }
+
+            if (!$this->funcionario->create()) {
+                $this->db->rollBack();
+                return ['sucesso' => false, 'erros' => ['Erro ao criar funcionário.']];
             }
 
             $this->db->commit();
             return [
                 'sucesso' => true, 
-                'mensagem' => 'Hóspede criado com sucesso!',
+                'mensagem' => 'Funcionário criado com sucesso!',
                 'id' => $this->pessoa->getId()
             ];
         } catch (Exception $e) {
@@ -76,9 +85,9 @@ class HospedeController {
 
     public function listar(): array {
         try {
-            $stmt = $this->hospede->read();
-            $hospedes = $stmt->fetchAll(PDO::FETCH_ASSOC);
-            return ['sucesso' => true, 'dados' => $hospedes];
+            $stmt = $this->funcionario->read();
+            $funcionarios = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            return ['sucesso' => true, 'dados' => $funcionarios];
         } catch (Exception $e) {
             return ['sucesso' => false, 'erros' => ['Erro: ' . $e->getMessage()]];
         }
@@ -86,13 +95,13 @@ class HospedeController {
 
     public function buscarPorId(int $id): array {
         try {
-            $this->hospede->setIdPessoa($id);
-            $dados = $this->hospede->readComplete();
+            $this->funcionario->setIdPessoa($id);
+            $dados = $this->funcionario->readComplete();
             
             if ($dados) {
                 return ['sucesso' => true, 'dados' => $dados];
             }
-            return ['sucesso' => false, 'erros' => ['Hóspede não encontrado.']];
+            return ['sucesso' => false, 'erros' => ['Funcionário não encontrado.']];
         } catch (Exception $e) {
             return ['sucesso' => false, 'erros' => ['Erro: ' . $e->getMessage()]];
         }
@@ -102,7 +111,6 @@ class HospedeController {
         try {
             $this->db->beginTransaction();
 
-            // Atualizar pessoa
             $this->pessoa->setId($id);
             if (!$this->pessoa->readOne()) {
                 $this->db->rollBack();
@@ -121,18 +129,20 @@ class HospedeController {
                 return ['sucesso' => false, 'erros' => ['Erro ao atualizar pessoa.']];
             }
 
-            // Atualizar hóspede
-            $this->hospede->setIdPessoa($id);
-            $this->hospede->setPreferencias($dados['preferencias'] ?? null);
-            $this->hospede->setHistorico($dados['historico'] ?? null);
+            $this->funcionario->setIdPessoa($id);
+            $this->funcionario->setCargo($dados['cargo'] ?? null);
+            $this->funcionario->setSalario($dados['salario'] ?? null);
+            $this->funcionario->setDataContratacao($dados['data_contratacao']);
+            $this->funcionario->setNumeroCtps($dados['numero_ctps'] ?? null);
+            $this->funcionario->setTurno($dados['turno'] ?? null);
 
-            if (!$this->hospede->update()) {
+            if (!$this->funcionario->update()) {
                 $this->db->rollBack();
-                return ['sucesso' => false, 'erros' => ['Erro ao atualizar hóspede.']];
+                return ['sucesso' => false, 'erros' => ['Erro ao atualizar funcionário.']];
             }
 
             $this->db->commit();
-            return ['sucesso' => true, 'mensagem' => 'Hóspede atualizado!'];
+            return ['sucesso' => true, 'mensagem' => 'Funcionário atualizado!'];
         } catch (Exception $e) {
             $this->db->rollBack();
             return ['sucesso' => false, 'erros' => ['Erro: ' . $e->getMessage()]];
@@ -143,10 +153,10 @@ class HospedeController {
         try {
             $this->db->beginTransaction();
 
-            $this->hospede->setIdPessoa($id);
-            if (!$this->hospede->delete()) {
+            $this->funcionario->setIdPessoa($id);
+            if (!$this->funcionario->delete()) {
                 $this->db->rollBack();
-                return ['sucesso' => false, 'erros' => ['Erro ao excluir hóspede.']];
+                return ['sucesso' => false, 'erros' => ['Erro ao excluir funcionário.']];
             }
 
             $this->pessoa->setId($id);
@@ -156,7 +166,7 @@ class HospedeController {
             }
 
             $this->db->commit();
-            return ['sucesso' => true, 'mensagem' => 'Hóspede excluído!'];
+            return ['sucesso' => true, 'mensagem' => 'Funcionário excluído!'];
         } catch (Exception $e) {
             $this->db->rollBack();
             return ['sucesso' => false, 'erros' => ['Erro: ' . $e->getMessage()]];

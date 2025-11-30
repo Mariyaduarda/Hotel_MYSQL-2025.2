@@ -1,7 +1,10 @@
 <?php
 
+namespace Model;
+
 require_once __DIR__ . '/../utils/Validacoes.php';
 require_once __DIR__ . '/../utils/Formatter.php';
+require_once __DIR__ . '/../database/Database.php';   
 
 class Quarto {
     private $conn;

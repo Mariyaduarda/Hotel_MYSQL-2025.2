@@ -1,0 +1,115 @@
+<?php
+
+namespace Controller;
+
+require_once __DIR__ . '/../model/Quarto.php';
+require_once __DIR__ . '/../database/Database.php';
+
+use database\Database;
+use model\Quarto;
+$db = new Database(); 
+
+class QuartoController {
+    private $db;
+    private $quarto;
+
+    public function __construct() {
+        $database = new Database();
+        $this->db = $database->getConnection();
+        $this->quarto = new Quarto($this->db);
+    }
+
+    // CREATE
+    public function criar(array $dados): array {
+        try {
+            $this->quarto->setNumero((int)$dados['numero']);
+            $this->quarto->setAndar((int)$dados['andar']);
+            $this->quarto->setTipo($dados['tipo_quarto']);
+            $this->quarto->setValorDiaria((float)$dados['valor_diaria']);
+            $this->quarto->setCapacidade((int)$dados['capacidade_maxima']);
+            $this->quarto->setDescricao($dados['descricao'] ?? null);
+            $this->quarto->setStatus($dados['status'] ?? 'disponivel');
+
+            if ($this->quarto->create()) {
+                return ['sucesso' => true, 'mensagem' => 'Quarto criado com sucesso!'];
+            }
+
+            return ['sucesso' => false, 'erros' => ['Erro ao criar quarto.']];
+        } catch (Exception $e) {
+            return ['sucesso' => false, 'erros' => ['Erro: ' . $e->getMessage()]];
+        }
+    }
+
+    // READ ALL
+    public function listar(): array {
+        try {
+            $stmt = $this->quarto->read();
+            $quartos = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+            return ['sucesso' => true, 'dados' => $quartos];
+        } catch (Exception $e) {
+            return ['sucesso' => false, 'erros' => ['Erro ao listar quartos: ' . $e->getMessage()]];
+        }
+    }
+
+    // READ ONE
+    public function buscarPorId(int $id): array {
+        try {
+            $this->quarto->setId($id);
+            
+            if ($this->quarto->readOne()) {
+                return ['sucesso' => true, 'dados' => $this->quarto->toArray()];
+            }
+
+            return ['sucesso' => false, 'erros' => ['Quarto não encontrado.']];
+        } catch (Exception $e) {
+            return ['sucesso' => false, 'erros' => ['Erro: ' . $e->getMessage()]];
+        }
+    }
+
+    // UPDATE
+    public function atualizar(int $id, array $dados): array {
+        try {
+            $this->quarto->setId($id);
+            
+            if (!$this->quarto->readOne()) {
+                return ['sucesso' => false, 'erros' => ['Quarto não encontrado.']];
+            }
+
+            $this->quarto->setNumero((int)$dados['numero']);
+            $this->quarto->setAndar((int)$dados['andar']);
+            $this->quarto->setTipo($dados['tipo_quarto']);
+            $this->quarto->setValorDiaria((float)$dados['valor_diaria']);
+            $this->quarto->setCapacidade((int)$dados['capacidade_maxima']);
+            $this->quarto->setDescricao($dados['descricao'] ?? null);
+            $this->quarto->setStatus($dados['status']);
+
+            if ($this->quarto->update()) {
+                return ['sucesso' => true, 'mensagem' => 'Quarto atualizado com sucesso!'];
+            }
+
+            return ['sucesso' => false, 'erros' => ['Erro ao atualizar quarto.']];
+        } catch (Exception $e) {
+            return ['sucesso' => false, 'erros' => ['Erro: ' . $e->getMessage()]];
+        }
+    }
+
+    // DELETE
+    public function deletar(int $id): array {
+        try {
+            $this->quarto->setId($id);
+            
+            if (!$this->quarto->readOne()) {
+                return ['sucesso' => false, 'erros' => ['Quarto não encontrado.']];
+            }
+
+            if ($this->quarto->delete()) {
+                return ['sucesso' => true, 'mensagem' => 'Quarto excluído com sucesso!'];
+            }
+
+            return ['sucesso' => false, 'erros' => ['Erro ao excluir quarto.']];
+        } catch (Exception $e) {
+            return ['sucesso' => false, 'erros' => ['Erro: ' . $e->getMessage()]];
+        }
+    }
+}
+?>

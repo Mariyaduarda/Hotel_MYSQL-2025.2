@@ -1,84 +1,165 @@
 <?php
-class Endereço {
-    private $rua;
-    private $numero;
-    private $cidade;
-    private $estado;
-    private $cep;
 
-    public function __construct($rua, $numero, $cidade, $estado, $cep) {
-        $this->rua = $rua;
-        $this->numero = $numero;
-        $this->cidade = $cidade;
-        $this->estado = $estado;
-        $this->cep = $cep;
+require_once __DIR__ . '/../utils/Validacoes.php';
+
+class Endereco {
+    private $conn;
+    private string $table_name = "endereco";
+
+    private ?int $id_endereco = null;
+    private ?string $logradouro = null;
+    private ?int $numero = null;
+    private ?string $bairro = null;
+    private ?string $cidade = null;
+    private ?string $estado = null;
+    private ?string $pais = null;
+    private ?string $cep = null;
+
+    public function __construct($db){
+        $this->conn = $db;
     }
 
-    public function getRua() {
-        return $this->rua;
-    }
+    // GETTERS / SETTERS
+    public function setId(int $id): void { $this->id_endereco = $id; }
+    public function getId(): ?int { return $this->id_endereco; }
 
-    public function getNumero() {
-        return $this->numero;
-    }
+    public function setLogradouro(?string $logradouro): void { $this->logradouro = $logradouro; }
+    public function getLogradouro(): ?string { return $this->logradouro; }
 
-    public function getCidade() {
-        return $this->cidade;
-    }
+    public function setNumero(?int $numero): void { $this->numero = $numero; }
+    public function getNumero(): ?int { return $this->numero; }
 
-    public function getEstado() {
-        return $this->estado;
-    }
+    public function setBairro(?string $bairro): void { $this->bairro = $bairro; }
+    public function getBairro(): ?string { return $this->bairro; }
 
-    public function getCep() {
-        return $this->cep;
-    }
-    public function criar(array $dados): array {
-    try {
-        // 1. PRIMEIRO: Criar o endereço
-        $endereco = new Endereco($this->db);
-        $endereco->setRua($dados['rua'] ?? '');
-        $endereco->setCidade($dados['cidade'] ?? '');
-        $endereco->setEstado($dados['estado'] ?? '');
-        $endereco->setCep($dados['cep'] ?? '');
-        $endereco->setNumero($dados['numero'] ?? '');
-        $endereco->setComplemento($dados['complemento'] ?? null);
-        
-        // Validar e criar endereço
-        $errosEndereco = $endereco->validar();
-        if (!empty($errosEndereco)) {
-            return ['sucesso' => false, 'erros' => $errosEndereco];
+    public function setCidade(?string $cidade): void { $this->cidade = $cidade; }
+    public function getCidade(): ?string { return $this->cidade; }
+
+    public function setEstado(?string $estado): void { $this->estado = $estado; }
+    public function getEstado(): ?string { return $this->estado; }
+
+    public function setPais(?string $pais): void { $this->pais = $pais; }
+    public function getPais(): ?string { return $this->pais; }
+
+    public function setCep(?string $cep): void { $this->cep = $cep; }
+    public function getCep(): ?string { return $this->cep; }
+
+    // CREATE
+    public function create(): bool {
+        $query = "INSERT INTO " . $this->table_name . " 
+                  (logradouro, numero, bairro, cidade, estado, pais, cep) 
+                  VALUES (:logradouro, :numero, :bairro, :cidade, :estado, :pais, :cep)";
+
+        $stmt = $this->conn->prepare($query);
+
+        $stmt->bindParam(":logradouro", $this->logradouro);
+        $stmt->bindParam(":numero", $this->numero, \PDO::PARAM_INT);
+        $stmt->bindParam(":bairro", $this->bairro);
+        $stmt->bindParam(":cidade", $this->cidade);
+        $stmt->bindParam(":estado", $this->estado);
+        $stmt->bindParam(":pais", $this->pais);
+        $stmt->bindParam(":cep", $this->cep);
+
+        if ($stmt->execute()) {
+            $this->id_endereco = (int)$this->conn->lastInsertId();
+            return true;
         }
-        
-        $endereco_id = $endereco->create(); // Retorna o ID do endereço criado
-        
-        if (!$endereco_id) {
-            return ['sucesso' => false, 'erros' => ['Erro ao criar endereço.']];
+        return false;
+    }
+
+    // READ ALL
+    public function read(): \PDOStatement {
+        $query = "SELECT * FROM " . $this->table_name . " ORDER BY cidade ASC";
+        $stmt = $this->conn->prepare($query);
+        $stmt->execute();
+        return $stmt;
+    }
+
+    // READ ONE
+    public function readOne(): bool {
+        $query = "SELECT * FROM " . $this->table_name . " WHERE id_endereco = :id LIMIT 1";
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(":id", $this->id_endereco, \PDO::PARAM_INT);
+        $stmt->execute();
+
+        $row = $stmt->fetch(\PDO::FETCH_ASSOC);
+
+        if($row){
+            $this->logradouro = $row['logradouro'];
+            $this->numero = $row['numero'] ? (int)$row['numero'] : null;
+            $this->bairro = $row['bairro'];
+            $this->cidade = $row['cidade'];
+            $this->estado = $row['estado'];
+            $this->pais = $row['pais'];
+            $this->cep = $row['cep'];
+            return true;
+        }
+        return false;
+    }
+
+    // UPDATE
+    public function update(): bool {
+        $query = "UPDATE " . $this->table_name . "
+                  SET logradouro = :logradouro,
+                      numero = :numero,
+                      bairro = :bairro,
+                      cidade = :cidade,
+                      estado = :estado,
+                      pais = :pais,
+                      cep = :cep
+                  WHERE id_endereco = :id";
+
+        $stmt = $this->conn->prepare($query);
+
+        $stmt->bindParam(":logradouro", $this->logradouro);
+        $stmt->bindParam(":numero", $this->numero, \PDO::PARAM_INT);
+        $stmt->bindParam(":bairro", $this->bairro);
+        $stmt->bindParam(":cidade", $this->cidade);
+        $stmt->bindParam(":estado", $this->estado);
+        $stmt->bindParam(":pais", $this->pais);
+        $stmt->bindParam(":cep", $this->cep);
+        $stmt->bindParam(":id", $this->id_endereco, \PDO::PARAM_INT);
+
+        return $stmt->execute();
+    }
+
+    // DELETE
+    public function delete(): bool {
+        $query = "DELETE FROM " . $this->table_name . " WHERE id_endereco = :id";
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(":id", $this->id_endereco, \PDO::PARAM_INT);
+        return $stmt->execute();
+    }
+
+    public function toArray(): array {
+        return [
+            'id_endereco' => $this->id_endereco,
+            'logradouro' => $this->logradouro,
+            'numero' => $this->numero,
+            'bairro' => $this->bairro,
+            'cidade' => $this->cidade,
+            'estado' => $this->estado,
+            'pais' => $this->pais,
+            'cep' => $this->cep
+        ];
+    }
+
+    public function validar(): array {
+        $erros = [];
+
+        if (empty($this->cidade)) {
+            $erros[] = "Cidade é obrigatória.";
         }
 
-        // 2. DEPOIS: Criar o hóspede com o ID do endereço
-        $this->hospede->setNome($dados['nome']);
-        $this->hospede->setCpf($dados['cpf']);
-        $this->hospede->setEmail($dados['email']);
-        $this->hospede->setTelefone($dados['telefone']);
-        $this->hospede->setEnderecoId($endereco_id); // Passar o ID, não a string
-        $this->hospede->setDataNascimento($dados['data_nascimento'] ?? null);
-
-        $erros = $this->hospede->validar();
-        
-        if (!empty($erros)) {
-            return ['sucesso' => false, 'erros' => $erros];
+        if (empty($this->estado)) {
+            $erros[] = "Estado é obrigatório.";
         }
 
-        if ($this->hospede->create()) {
-            return ['sucesso' => true, 'mensagem' => 'Hóspede cadastrado com sucesso!'];
+        if ($this->cep && !preg_match('/^\d{5}-?\d{3}$/', $this->cep)) {
+            $erros[] = "CEP inválido.";
         }
 
-        return ['sucesso' => false, 'erros' => ['Erro ao cadastrar hóspede.']];
-    } catch (Exception $e) {
-        return ['sucesso' => false, 'erros' => ['Erro: ' . $e->getMessage()]];
+        return $erros;
     }
 }
-}
-
 ?>

@@ -1,29 +1,41 @@
 <?php
+// database/Database.php
 
+namespace Database;
+
+// sem '\' antes de PDO e PDOException caso contrrio o php usa constantes dentro do namespace
 class Database {
     private $host = "localhost";
-    private $db_name = "mydb";
-    private $username = "root";
-    private $password = "bd2025";  // ← SENHA VAZIA (tente sem senha)
+    private $db_name = "mydb";  
+    private $username = "root";  
+    private $password = "bd2025";      
     private $conn;
+    private $charset = "utf8mb4";
 
     public function getConnection() {
         $this->conn = null;
 
         try {
-            $this->conn = new PDO(
-                "mysql:host={$this->host};dbname={$this->db_name}",
-                $this->username,
-                $this->password
-            );
-            $this->conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-            $this->conn->exec("SET NAMES utf8mb4");
+            $dsn = "mysql:host=" . $this->host . ";dbname=" . $this->db_name . ";charset=" . $this->charset;
             
-        } catch (PDOException $e) {
-            die("❌ ERRO DE CONEXÃO: " . $e->getMessage());
+            $options = [
+                \PDO::ATTR_ERRMODE            => \PDO::ERRMODE_EXCEPTION,
+                \PDO::ATTR_DEFAULT_FETCH_MODE => \PDO::FETCH_ASSOC,
+                \PDO::ATTR_EMULATE_PREPARES   => false,
+            ];
+
+            $this->conn = new \PDO($dsn, $this->username, $this->password, $options);
+            
+        } catch(\PDOException $exception) {
+            echo "Erro de conexão: " . $exception->getMessage();
+            die();
         }
 
         return $this->conn;
+    }
+
+    public function closeConnection() {
+        $this->conn = null;
     }
 }
 ?>

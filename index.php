@@ -92,8 +92,11 @@
                             <a href="view/listar_quartos.php" class="btn btn-outline-warning">
                                 <i class="bi bi-list-ul"></i> Listar
                             </a>
-                            <a href="view/consultar_disponibilidade.php" class="btn btn-outline-info">
-                                <i class="bi bi-search"></i> Disponibilidade
+                            <a href="view/deletar_quarto.php" class="btn btn-outline-danger">
+                                <i class="bi bi-search"></i> Deletar
+                            </a>
+                            <a href="view/editar_quartos.php" class="btn btn-outline-danger">
+                                <i class="bi bi-search"></i> Editar
                             </a>
                         </div>
                     </div>

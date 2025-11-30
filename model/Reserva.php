@@ -1,111 +1,102 @@
 <?php
 
-require_once __DIR__ . '/../utils/Validacoes.php';
-require_once __DIR__ . '/../utils/Formatter.php';
-
 class Reserva {
     private $conn;
-    private string $table_name = "reservas";
+    private string $table_name = "reserva";
 
-    private ?int    $id = null;
-    private int     $hospede_id;
-    private int     $quarto_id;
-    private int     $funcionario_id;
-    private string  $data_checkin;
-    private string  $data_checkout;
-    private int     $num_hospedes;
-    private float   $valor_total;
-    private string  $status = 'pendente';
-    private ?string $observacoes = null;
-    private ?string $created_at = null;
+    private ?int $idreserva = null;
+    private ?float $valor_reserva = null;
+    private ?string $data_reserva = null;
+    private ?string $data_checkin_previsto = null;
+    private ?string $data_checkout_previsto = null;
+    private string $status = 'pendente';
+    private int $id_funcionario;
+    private int $id_hospede;
+    private int $id_quarto;
 
-    private const STATUS_VALIDOS = ['pendente', 'confirmada', 'cancelada', 'concluida'];
-    private const NUM_HOSPEDES_MIN = 1;
-    private const NUM_HOSPEDES_MAX = 10;
-    private const OBSERVACOES_MAX = 500;
+    private const STATUS_VALIDOS = ['pendente', 'confirmada', 'cancelada', 'concluida', 'em_andamento'];
 
     public function __construct($db){
         $this->conn = $db;
     }
 
     // GETTERS / SETTERS
-    public function setId(int $id): void { $this->id = $id; }
-    public function getId(): ?int { return $this->id; }
+    public function setId(int $id): void { $this->idreserva = $id; }
+    public function getId(): ?int { return $this->idreserva; }
 
-    public function setHospedeId(int $hospede_id): void { $this->hospede_id = $hospede_id; }
-    public function getHospedeId(): int { return $this->hospede_id; }
+    public function setValorReserva(?float $valor): void { $this->valor_reserva = $valor; }
+    public function getValorReserva(): ?float { return $this->valor_reserva; }
 
-    public function setQuartoId(int $quarto_id): void { $this->quarto_id = $quarto_id; }
-    public function getQuartoId(): int { return $this->quarto_id; }
+    public function setDataReserva(?string $data): void { $this->data_reserva = $data; }
+    public function getDataReserva(): ?string { return $this->data_reserva; }
 
-    public function setFuncionarioId(int $funcionario_id): void { $this->funcionario_id = $funcionario_id; }
-    public function getFuncionarioId(): int { return $this->funcionario_id; }
+    public function setDataCheckin(?string $data): void { $this->data_checkin_previsto = $data; }
+    public function getDataCheckin(): ?string { return $this->data_checkin_previsto; }
 
-    public function setDataCheckin(string $data): void { $this->data_checkin = $data; }
-    public function getDataCheckin(): string { return $this->data_checkin; }
-    public function getDataCheckinFormatada(): string { return Formatter::formatarData($this->data_checkin); }
-
-    public function setDataCheckout(string $data): void { $this->data_checkout = $data; }
-    public function getDataCheckout(): string { return $this->data_checkout; }
-    public function getDataCheckoutFormatada(): string { return Formatter::formatarData($this->data_checkout); }
-
-    public function setNumHospedes(int $num): void { $this->num_hospedes = $num; }
-    public function getNumHospedes(): int { return $this->num_hospedes; }
-
-    public function setValorTotal(float $valor): void { $this->valor_total = $valor; }
-    public function getValorTotal(): float { return $this->valor_total; }
-    public function getValorTotalFormatado(): string { return Formatter::formatarMoeda($this->valor_total); }
+    public function setDataCheckout(?string $data): void { $this->data_checkout_previsto = $data; }
+    public function getDataCheckout(): ?string { return $this->data_checkout_previsto; }
 
     public function setStatus(string $status): void { $this->status = $status; }
     public function getStatus(): string { return $this->status; }
-    public function getStatusFormatado(): string { return Formatter::formatarStatusBadge($this->status); }
 
-    public function setObservacoes(?string $obs): void { $this->observacoes = $obs; }
-    public function getObservacoes(): ?string { return $this->observacoes; }
+    public function setFuncionarioId(int $id): void { $this->id_funcionario = $id; }
+    public function getFuncionarioId(): int { return $this->id_funcionario; }
 
-    public function getCreatedAt(): ?string { return $this->created_at; }
-    public function getCreatedAtFormatado(): ?string {
-        return $this->created_at ? Formatter::formatarData($this->created_at) : null;
-    }
+    public function setHospedeId(int $id): void { $this->id_hospede = $id; }
+    public function getHospedeId(): int { return $this->id_hospede; }
+
+    public function setQuartoId(int $id): void { $this->id_quarto = $id; }
+    public function getQuartoId(): int { return $this->id_quarto; }
+
+    // Métodos adicionais para compatibilidade com o controller
+    public function setValorTotal(float $valor): void { $this->valor_reserva = $valor; }
+    public function setNumHospedes(int $num): void { /* Campo não existe na tabela */ }
+    public function setObservacoes(?string $obs): void { /* Campo não existe na tabela */ }
 
     // CREATE
     public function create(): bool {
+        // Define data_reserva como hoje se não foi informada
+        if (empty($this->data_reserva)) {
+            $this->data_reserva = date('Y-m-d');
+        }
+
         $query = "INSERT INTO " . $this->table_name . " 
-                  (hospede_id, quarto_id, funcionario_id, data_checkin, data_checkout, 
-                   num_hospedes, valor_total, status, observacoes, data_criacao) 
-                  VALUES (:hospede_id, :quarto_id, :funcionario_id, :data_checkin, :data_checkout,
-                          :num_hospedes, :valor_total, :status, :observacoes, :data_criacao)";
+                  (valor_reserva, data_reserva, data_checkin_previsto, data_checkout_previsto, 
+                   status, id_funcionario, id_hospede, id_quarto) 
+                  VALUES (:valor, :data_reserva, :checkin, :checkout, :status, :funcionario, :hospede, :quarto)";
 
         $stmt = $this->conn->prepare($query);
 
-        $data_criacao = $this->created_at ?? date('Y-m-d H:i:s');
-
-        $stmt->bindParam(":hospede_id", $this->hospede_id, \PDO::PARAM_INT);
-        $stmt->bindParam(":quarto_id", $this->quarto_id, \PDO::PARAM_INT);
-        $stmt->bindParam(":funcionario_id", $this->funcionario_id, \PDO::PARAM_INT);
-        $stmt->bindParam(":data_checkin", $this->data_checkin);
-        $stmt->bindParam(":data_checkout", $this->data_checkout);
-        $stmt->bindParam(":num_hospedes", $this->num_hospedes, \PDO::PARAM_INT);
-        $stmt->bindParam(":valor_total", $this->valor_total);
+        $stmt->bindParam(":valor", $this->valor_reserva);
+        $stmt->bindParam(":data_reserva", $this->data_reserva);
+        $stmt->bindParam(":checkin", $this->data_checkin_previsto);
+        $stmt->bindParam(":checkout", $this->data_checkout_previsto);
         $stmt->bindParam(":status", $this->status);
-        $stmt->bindParam(":observacoes", $this->observacoes);
-        $stmt->bindParam(":data_criacao", $data_criacao);
+        $stmt->bindParam(":funcionario", $this->id_funcionario, \PDO::PARAM_INT);
+        $stmt->bindParam(":hospede", $this->id_hospede, \PDO::PARAM_INT);
+        $stmt->bindParam(":quarto", $this->id_quarto, \PDO::PARAM_INT);
 
-        return $stmt->execute();
+        if ($stmt->execute()) {
+            $this->idreserva = (int)$this->conn->lastInsertId();
+            return true;
+        }
+        return false;
     }
 
     // READ ALL
     public function read(): \PDOStatement {
         $query = "SELECT r.*, 
-                         h.nome as hospede_nome, h.cpf as hospede_cpf,
-                         q.numero_quarto, q.tipo as quarto_tipo,
-                         f.nome as funcionario_nome
+                         p_hosp.nome as nome_hospede,
+                         p_func.nome as nome_funcionario,
+                         q.numero as numero_quarto,
+                         q.tipo_quarto
                   FROM " . $this->table_name . " r
-                  INNER JOIN hospede h ON r.hospede_id = h.id
-                  INNER JOIN quarto q ON r.quarto_id = q.id
-                  INNER JOIN funcionario f ON r.funcionario_id = f.id
-                  ORDER BY r.data_checkin DESC";
-        
+                  LEFT JOIN hospede h ON r.id_hospede = h.id_pessoa
+                  LEFT JOIN pessoa p_hosp ON h.id_pessoa = p_hosp.id_pessoa
+                  LEFT JOIN funcionario f ON r.id_funcionario = f.id_pessoa
+                  LEFT JOIN pessoa p_func ON f.id_pessoa = p_func.id_pessoa
+                  LEFT JOIN quarto q ON r.id_quarto = q.id_quarto
+                  ORDER BY r.data_reserva DESC";
         $stmt = $this->conn->prepare($query);
         $stmt->execute();
         return $stmt;
@@ -113,34 +104,22 @@ class Reserva {
 
     // READ ONE
     public function readOne(): bool {
-        $query = "SELECT r.*,
-                         h.nome as hospede_nome, h.cpf as hospede_cpf, h.email as hospede_email,
-                         q.numero_quarto, q.tipo as quarto_tipo, q.preco_diaria,
-                         f.nome as funcionario_nome
-                  FROM " . $this->table_name . " r
-                  INNER JOIN hospede h ON r.hospede_id = h.id
-                  INNER JOIN quarto q ON r.quarto_id = q.id
-                  INNER JOIN funcionario f ON r.funcionario_id = f.id
-                  WHERE r.id = :id 
-                  LIMIT 1";
-        
+        $query = "SELECT * FROM " . $this->table_name . " WHERE idreserva = :id LIMIT 1";
         $stmt = $this->conn->prepare($query);
-        $stmt->bindParam(":id", $this->id, \PDO::PARAM_INT);
+        $stmt->bindParam(":id", $this->idreserva, \PDO::PARAM_INT);
         $stmt->execute();
 
         $row = $stmt->fetch(\PDO::FETCH_ASSOC);
 
         if($row){
-            $this->hospede_id =      (int)$row['hospede_id'];
-            $this->quarto_id =       (int)$row['quarto_id'];
-            $this->funcionario_id =  (int)$row['funcionario_id'];
-            $this->data_checkin =    $row['data_checkin'];
-            $this->data_checkout =   $row['data_checkout'];
-            $this->num_hospedes =    (int)$row['num_hospedes'];
-            $this->valor_total =     (float)$row['valor_total'];
-            $this->status =          $row['status'];
-            $this->observacoes =     $row['observacoes'];
-            $this->created_at =      $row['data_criacao'] ?? null;
+            $this->valor_reserva = $row['valor_reserva'] ? (float)$row['valor_reserva'] : null;
+            $this->data_reserva = $row['data_reserva'];
+            $this->data_checkin_previsto = $row['data_checkin_previsto'];
+            $this->data_checkout_previsto = $row['data_checkout_previsto'];
+            $this->status = $row['status'];
+            $this->id_funcionario = (int)$row['id_funcionario'];
+            $this->id_hospede = (int)$row['id_hospede'];
+            $this->id_quarto = (int)$row['id_quarto'];
             return true;
         }
         return false;
@@ -149,238 +128,180 @@ class Reserva {
     // UPDATE
     public function update(): bool {
         $query = "UPDATE " . $this->table_name . "
-                  SET hospede_id = :hospede_id,
-                      quarto_id = :quarto_id,
-                      funcionario_id = :funcionario_id,
-                      data_checkin = :data_checkin,
-                      data_checkout = :data_checkout,
-                      num_hospedes = :num_hospedes,
-                      valor_total = :valor_total,
+                  SET valor_reserva = :valor,
+                      data_reserva = :data_reserva,
+                      data_checkin_previsto = :checkin,
+                      data_checkout_previsto = :checkout,
                       status = :status,
-                      observacoes = :observacoes
-                  WHERE id = :id";
+                      id_funcionario = :funcionario,
+                      id_hospede = :hospede,
+                      id_quarto = :quarto
+                  WHERE idreserva = :id";
 
         $stmt = $this->conn->prepare($query);
 
-        $stmt->bindParam(":hospede_id", $this->hospede_id, \PDO::PARAM_INT);
-        $stmt->bindParam(":quarto_id", $this->quarto_id, \PDO::PARAM_INT);
-        $stmt->bindParam(":funcionario_id", $this->funcionario_id, \PDO::PARAM_INT);
-        $stmt->bindParam(":data_checkin", $this->data_checkin);
-        $stmt->bindParam(":data_checkout", $this->data_checkout);
-        $stmt->bindParam(":num_hospedes", $this->num_hospedes, \PDO::PARAM_INT);
-        $stmt->bindParam(":valor_total", $this->valor_total);
+        $stmt->bindParam(":valor", $this->valor_reserva);
+        $stmt->bindParam(":data_reserva", $this->data_reserva);
+        $stmt->bindParam(":checkin", $this->data_checkin_previsto);
+        $stmt->bindParam(":checkout", $this->data_checkout_previsto);
         $stmt->bindParam(":status", $this->status);
-        $stmt->bindParam(":observacoes", $this->observacoes);
-        $stmt->bindParam(":id", $this->id, \PDO::PARAM_INT);
+        $stmt->bindParam(":funcionario", $this->id_funcionario, \PDO::PARAM_INT);
+        $stmt->bindParam(":hospede", $this->id_hospede, \PDO::PARAM_INT);
+        $stmt->bindParam(":quarto", $this->id_quarto, \PDO::PARAM_INT);
+        $stmt->bindParam(":id", $this->idreserva, \PDO::PARAM_INT);
 
         return $stmt->execute();
     }
 
     // DELETE
     public function delete(): bool {
-        // Só permite excluir reservas canceladas ou pendentes
-        if(!in_array($this->status, ['cancelada', 'pendente'])){
+        // Só permite deletar reservas pendentes ou canceladas
+        if (!in_array($this->status, ['pendente', 'cancelada'])) {
             return false;
         }
 
-        $query = "DELETE FROM " . $this->table_name . " WHERE id = :id";
+        $query = "DELETE FROM " . $this->table_name . " WHERE idreserva = :id";
         $stmt = $this->conn->prepare($query);
-        $stmt->bindParam(":id", $this->id, \PDO::PARAM_INT);
+        $stmt->bindParam(":id", $this->idreserva, \PDO::PARAM_INT);
         return $stmt->execute();
+    }
+
+    public function toArray(): array {
+        return [
+            'idreserva' => $this->idreserva,
+            'valor_reserva' => $this->valor_reserva,
+            'data_reserva' => $this->data_reserva,
+            'data_checkin_previsto' => $this->data_checkin_previsto,
+            'data_checkout_previsto' => $this->data_checkout_previsto,
+            'status' => $this->status,
+            'id_funcionario' => $this->id_funcionario,
+            'id_hospede' => $this->id_hospede,
+            'id_quarto' => $this->id_quarto
+        ];
+    }
+
+    public function validar(): array {
+        $erros = [];
+
+        if (empty($this->id_hospede)) {
+            $erros[] = "Hóspede é obrigatório.";
+        }
+
+        if (empty($this->id_quarto)) {
+            $erros[] = "Quarto é obrigatório.";
+        }
+
+        if (empty($this->id_funcionario)) {
+            $erros[] = "Funcionário é obrigatório.";
+        }
+
+        if (empty($this->data_checkin_previsto)) {
+            $erros[] = "Data de check-in é obrigatória.";
+        }
+
+        if (empty($this->data_checkout_previsto)) {
+            $erros[] = "Data de check-out é obrigatória.";
+        }
+
+        if ($this->data_checkin_previsto && $this->data_checkout_previsto) {
+            if (strtotime($this->data_checkout_previsto) <= strtotime($this->data_checkin_previsto)) {
+                $erros[] = "Data de check-out deve ser posterior à data de check-in.";
+            }
+        }
+
+        if (!in_array($this->status, self::STATUS_VALIDOS)) {
+            $erros[] = "Status inválido.";
+        }
+
+        return $erros;
+    }
+
+    // Calcular valor total baseado no preço da diária e número de dias
+    public function calcularValorTotal(float $preco_diaria): float {
+        if (empty($this->data_checkin_previsto) || empty($this->data_checkout_previsto)) {
+            return 0;
+        }
+
+        $checkin = new DateTime($this->data_checkin_previsto);
+        $checkout = new DateTime($this->data_checkout_previsto);
+        $diff = $checkin->diff($checkout);
+        $dias = $diff->days;
+
+        return $preco_diaria * $dias;
     }
 
     // Cancelar reserva
     public function cancelar(): bool {
         $this->status = 'cancelada';
-        $query = "UPDATE " . $this->table_name . " SET status = 'cancelada' WHERE id = :id";
+        
+        $query = "UPDATE " . $this->table_name . " SET status = 'cancelada' WHERE idreserva = :id";
         $stmt = $this->conn->prepare($query);
-        $stmt->bindParam(":id", $this->id, \PDO::PARAM_INT);
+        $stmt->bindParam(":id", $this->idreserva, \PDO::PARAM_INT);
+        
         return $stmt->execute();
     }
 
     // Confirmar reserva
     public function confirmar(): bool {
         $this->status = 'confirmada';
-        $query = "UPDATE " . $this->table_name . " SET status = 'confirmada' WHERE id = :id";
+        
+        $query = "UPDATE " . $this->table_name . " SET status = 'confirmada' WHERE idreserva = :id";
         $stmt = $this->conn->prepare($query);
-        $stmt->bindParam(":id", $this->id, \PDO::PARAM_INT);
+        $stmt->bindParam(":id", $this->idreserva, \PDO::PARAM_INT);
+        
         return $stmt->execute();
     }
 
-    // Concluir reserva (checkout realizado)
+    // Concluir reserva (checkout)
     public function concluir(): bool {
         $this->status = 'concluida';
-        $query = "UPDATE " . $this->table_name . " SET status = 'concluida' WHERE id = :id";
+        
+        $query = "UPDATE " . $this->table_name . " SET status = 'concluida' WHERE idreserva = :id";
         $stmt = $this->conn->prepare($query);
-        $stmt->bindParam(":id", $this->id, \PDO::PARAM_INT);
+        $stmt->bindParam(":id", $this->idreserva, \PDO::PARAM_INT);
+        
         return $stmt->execute();
     }
 
-    // Calcular valor total baseado no período e preço da diária
-    public function calcularValorTotal(float $preco_diaria): float {
-        $checkin = new DateTime($this->data_checkin);
-        $checkout = new DateTime($this->data_checkout);
-        $diferenca = $checkout->diff($checkin);
-        $num_diarias = $diferenca->days;
-        
-        // Mínimo de 1 diária
-        if($num_diarias < 1) $num_diarias = 1;
-        
-        return $num_diarias * $preco_diaria;
-    }
-
-    // Calcular número de diárias
-    public function calcularNumDiarias(): int {
-        $checkin = new DateTime($this->data_checkin);
-        $checkout = new DateTime($this->data_checkout);
-        $diferenca = $checkout->diff($checkin);
-        return max(1, $diferenca->days);
-    }
-
-    // Verificar disponibilidade do quarto no período
-    public function verificarDisponibilidade(): bool {
-        $query = "SELECT COUNT(*) as total 
-                  FROM " . $this->table_name . " 
-                  WHERE quarto_id = :quarto_id 
-                    AND status IN ('confirmada', 'pendente')
-                    AND NOT (data_checkout < :data_checkin OR data_checkin > :data_checkout)";
-
-        if($this->id !== null){
-            $query .= " AND id != :id";
-        }
-
-        $stmt = $this->conn->prepare($query);
-        $stmt->bindParam(":quarto_id", $this->quarto_id, \PDO::PARAM_INT);
-        $stmt->bindParam(":data_checkin", $this->data_checkin);
-        $stmt->bindParam(":data_checkout", $this->data_checkout);
-
-        if($this->id !== null){
-            $stmt->bindParam(":id", $this->id, \PDO::PARAM_INT);
-        }
-
-        $stmt->execute();
-        $row = $stmt->fetch(\PDO::FETCH_ASSOC);
-        
-        return ($row && (int)$row['total'] === 0);
-    }
-
-    // Listar reservas por período
+    // Listar por período
     public function listarPorPeriodo(string $data_inicio, string $data_fim): array {
         $query = "SELECT r.*, 
-                         h.nome as hospede_nome,
-                         q.numero_quarto, q.tipo as quarto_tipo
+                         p_hosp.nome as nome_hospede,
+                         q.numero as numero_quarto
                   FROM " . $this->table_name . " r
-                  INNER JOIN hospede h ON r.hospede_id = h.id
-                  INNER JOIN quarto q ON r.quarto_id = q.id
-                  WHERE r.data_checkin >= :data_inicio 
-                    AND r.data_checkout <= :data_fim
-                  ORDER BY r.data_checkin ASC";
-
+                  LEFT JOIN hospede h ON r.id_hospede = h.id_pessoa
+                  LEFT JOIN pessoa p_hosp ON h.id_pessoa = p_hosp.id_pessoa
+                  LEFT JOIN quarto q ON r.id_quarto = q.id_quarto
+                  WHERE r.data_checkin_previsto BETWEEN :inicio AND :fim
+                  ORDER BY r.data_checkin_previsto ASC";
+        
         $stmt = $this->conn->prepare($query);
-        $stmt->bindParam(":data_inicio", $data_inicio);
-        $stmt->bindParam(":data_fim", $data_fim);
+        $stmt->bindParam(":inicio", $data_inicio);
+        $stmt->bindParam(":fim", $data_fim);
         $stmt->execute();
-
+        
         return $stmt->fetchAll(\PDO::FETCH_ASSOC);
     }
 
-    // Listar reservas por status
+    // Listar por status
     public function listarPorStatus(string $status): array {
         $query = "SELECT r.*, 
-                         h.nome as hospede_nome,
-                         q.numero_quarto
+                         p_hosp.nome as nome_hospede,
+                         q.numero as numero_quarto
                   FROM " . $this->table_name . " r
-                  INNER JOIN hospede h ON r.hospede_id = h.id
-                  INNER JOIN quarto q ON r.quarto_id = q.id
+                  LEFT JOIN hospede h ON r.id_hospede = h.id_pessoa
+                  LEFT JOIN pessoa p_hosp ON h.id_pessoa = p_hosp.id_pessoa
+                  LEFT JOIN quarto q ON r.id_quarto = q.id_quarto
                   WHERE r.status = :status
-                  ORDER BY r.data_checkin DESC";
-
+                  ORDER BY r.data_reserva DESC";
+        
         $stmt = $this->conn->prepare($query);
         $stmt->bindParam(":status", $status);
         $stmt->execute();
-
+        
         return $stmt->fetchAll(\PDO::FETCH_ASSOC);
     }
 
-    // Validar dados
-    public function validar(): array {
-        $erros = [];
-
-        if(empty($this->hospede_id)) {
-            $erros[] = "Hóspede é obrigatório.";
-        }
-
-        if(empty($this->quarto_id)) {
-            $erros[] = "Quarto é obrigatório.";
-        }
-
-        if(empty($this->funcionario_id)) {
-            $erros[] = "Funcionário responsável é obrigatório.";
-        }
-
-        if(empty($this->data_checkin)) {
-            $erros[] = "Data de check-in é obrigatória.";
-        } elseif (!Validacoes::validarData($this->data_checkin)){
-            $erros[] = "Data de check-in inválida.";
-        }
-
-        if(empty($this->data_checkout)) {
-            $erros[] = "Data de check-out é obrigatória.";
-        } elseif (!Validacoes::validarData($this->data_checkout)){
-            $erros[] = "Data de check-out inválida.";
-        }
-
-        // Validar se checkout é após checkin
-        if(!empty($this->data_checkin) && !empty($this->data_checkout)){
-            if($this->data_checkout <= $this->data_checkin){
-                $erros[] = "Data de check-out deve ser posterior à data de check-in.";
-            }
-        }
-
-        if($this->num_hospedes < self::NUM_HOSPEDES_MIN || $this->num_hospedes > self::NUM_HOSPEDES_MAX){
-            $erros[] = "Número de hóspedes deve estar entre " . self::NUM_HOSPEDES_MIN . " e " . self::NUM_HOSPEDES_MAX . ".";
-        }
-
-        if (!Validacoes::validarEnum($this->status, self::STATUS_VALIDOS)) {
-            $erros[] = "Status inválido. Opções: " . implode(', ', self::STATUS_VALIDOS);
-        }
-
-        if ($this->observacoes !== null && !Validacoes::validarTexto($this->observacoes, 0, self::OBSERVACOES_MAX)) {
-            $erros[] = "Observações muito longas (máximo " . self::OBSERVACOES_MAX . " caracteres).";
-        }
-
-        // Verificar disponibilidade do quarto
-        if(!$this->verificarDisponibilidade()){
-            $erros[] = "Quarto não está disponível no período selecionado.";
-        }
-
-        return $erros;
-    }
-
-    public function toArray(): array {
-        return [
-            'id' => $this->id,
-            'hospede_id' => $this->hospede_id,
-            'quarto_id' => $this->quarto_id,
-            'funcionario_id' => $this->funcionario_id,
-            'data_checkin' => $this->data_checkin,
-            'data_checkin_formatada' => $this->getDataCheckinFormatada(),
-            'data_checkout' => $this->data_checkout,
-            'data_checkout_formatada' => $this->getDataCheckoutFormatada(),
-            'num_hospedes' => $this->num_hospedes,
-            'num_diarias' => $this->calcularNumDiarias(),
-            'valor_total' => $this->valor_total,
-            'valor_total_formatado' => $this->getValorTotalFormatado(),
-            'status' => $this->status,
-            'status_formatado' => $this->getStatusFormatado(),
-            'observacoes' => $this->observacoes,
-            'created_at' => $this->created_at,
-            'created_at_formatado' => $this->getCreatedAtFormatado()
-        ];
-    }
-
-    public static function getStatusValidos(): array { 
-        return self::STATUS_VALIDOS; 
-    }
+    public static function getStatusValidos(): array { return self::STATUS_VALIDOS; }
 }
 ?>
