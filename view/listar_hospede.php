@@ -1,4 +1,9 @@
 <?php
+
+use controller\HospedeController;
+use database\Database;
+use model\Hospede;
+
 require_once __DIR__ . '../controller/HospedeController.php';
 require_once __DIR__ . '../utils/Formatter.php';
 

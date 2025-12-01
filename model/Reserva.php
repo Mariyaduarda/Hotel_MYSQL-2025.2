@@ -1,5 +1,7 @@
 <?php
 
+namespace Router;
+
 class Reserva {
     private $conn;
     private string $table_name = "reserva";

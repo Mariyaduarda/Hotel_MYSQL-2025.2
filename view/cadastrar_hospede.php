@@ -1,4 +1,10 @@
 <?php
+
+use controller\HospedeController;
+use database\Database;
+use model\Hospede;
+
+
 require_once __DIR__ . '/../controller/HospedeController.php';
 require_once __DIR__ . '/../model/Hospede.php';
 require_once __DIR__ . '/../database/Database.php';
@@ -79,7 +85,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         <div class="col-md-6 mb-3">
                             <label for="email" class="form-label">E-mail *</label>
                             <input type="email" class="form-control" id="email" name="email"
-                                   value="<?= htmlspecialchars($_POST['email'] ?? '') ?>" required>
+                                   value="<?= htmlspecialchars($_POST['email'] ?? '') ?>">
                         </div>
 
                         <div class="col-md-6 mb-3">
@@ -88,13 +94,47 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                    placeholder="(00) 00000-0000"
                                    value="<?= htmlspecialchars($_POST['telefone'] ?? '') ?>" required>
                         </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="estado" class="form-label">Estado *</label>
+                            <input type="text" class="form-control" id="estado" name="estado"
+                                   placeholder="Estado"
+                                   value="<?= htmlspecialchars($_POST['estado'] ?? '') ?>">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="cidade" class="form-label">Cidade *</label>
+                            <input type="text" class="form-control" id="cidade" name="cidade"
+                                   placeholder="Cidade"
+                                   value="<?= htmlspecialchars($_POST['cidade'] ?? '') ?>">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="bairro" class="form-label">Bairro *</label>
+                            <input type="text" class="form-control" id="bairro" name="bairro"
+                                   placeholder="Bairro"
+                                   value="<?= htmlspecialchars($_POST['bairro'] ?? '') ?>">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="pais" class="form-label">País *</label>
+                            <input type="text" class="form-control" id="pais" name="pais"
+                                   placeholder="País"
+                                   value="<?= htmlspecialchars($_POST['pais'] ?? '') ?>">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="cep" class="form-label">CEP *</label>
+                            <input type="text" class="form-control" id="Cep" name="cep"
+                                   placeholder="CEP"
+                                   value="<?= htmlspecialchars($_POST['cep'] ?? '') ?>">
+                        </div>
+                        <div class="col-3">
+                        <label for="numero" class="form-label">Número</label>
+                        <input type="text" class="form-control" id="numero" name="numero"
+                            value="<?= htmlspecialchars($_POST['numero'] ?? '') ?>">
+                    </div>   
                     </div>
 
                     <div class="mb-3">
                         <label for="endereco" class="form-label">Endereço</label>
                         <textarea class="form-control" id="endereco" name="endereco" rows="2"><?= htmlspecialchars($_POST['endereco'] ?? '') ?></textarea>
-                    </div>
-
+                    </div>       
                     <div class="d-flex gap-2">
                         <button type="submit" class="btn btn-primary">Cadastrar</button>
                         <a href="listar_hospedes.php" class="btn btn-secondary">Ver Lista</a>

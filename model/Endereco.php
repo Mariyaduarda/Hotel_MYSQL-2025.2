@@ -1,14 +1,17 @@
 <?php
 
+namespace Router;
+
 require_once __DIR__ . '/../utils/Validacoes.php';
+require_once __DIR__ . '/../database/Database.php';
 
 class Endereco {
     private $conn;
     private string $table_name = "endereco";
 
-    private ?int $id_endereco = null;
+    private ?int    $id_endereco = null;
     private ?string $logradouro = null;
-    private ?int $numero = null;
+    private ?int    $numero = null;
     private ?string $bairro = null;
     private ?string $cidade = null;
     private ?string $estado = null;

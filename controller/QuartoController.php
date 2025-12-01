@@ -1,12 +1,12 @@
 <?php
 
-namespace Controller;
+namespace Router;
 
 require_once __DIR__ . '/../model/Quarto.php';
 require_once __DIR__ . '/../database/Database.php';
 
 use database\Database;
-use model\Quarto;
+use router\Quarto;
 $db = new Database(); 
 
 class QuartoController {
@@ -16,7 +16,7 @@ class QuartoController {
     public function __construct() {
         $database = new Database();
         $this->db = $database->getConnection();
-        $this->quarto = new Quarto($this->db);
+        $this->quarto = \new Quarto($this->db);
     }
 
     // CREATE

@@ -1,5 +1,7 @@
 <?php
 
+namespace Router;
+
 require_once __DIR__ . '/../model/Pessoa.php';
 
 class Hospede {

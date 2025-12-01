@@ -1,7 +1,10 @@
 <?php
 
+namespace Router;
+
 require_once __DIR__ . '/../utils/Validacoes.php';
 require_once __DIR__ . '/../model/Endereco.php';
+REQUIRE_ONCE __DIR__ . '/../database/Database.php';
 
 class Pessoa {
     private $conn;

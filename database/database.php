@@ -1,7 +1,7 @@
 <?php
 // database/Database.php
 
-namespace Database;
+namespace database;
 
 // sem '\' antes de PDO e PDOException caso contrrio o php usa constantes dentro do namespace
 class Database {

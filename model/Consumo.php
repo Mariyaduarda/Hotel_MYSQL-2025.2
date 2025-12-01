@@ -1,5 +1,11 @@
 <?php
 
+namespace Router;
+
+require_once __DIR__ . '/../utils/Validacoes.php';
+require_once __DIR__ . '/../utils/Formatter.php';
+require_once __DIR__ . '/../database/Database.php';   
+
 class Consumo {
     private $conn;
     private string $table_name = "consumo";

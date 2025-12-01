@@ -1,5 +1,6 @@
 <?php 
 
+namespace Utils;
 /**
  *validacoes para dados gerais do hotel
  */
@@ -22,7 +23,7 @@
     // VALIDA DATA NO FORMATO YYYY-MM-DD
     public static function validarData(string $data): bool 
     {
-        $d = DateTime::createFromFormat('Y-m-d', $data);
+        $d = \DateTime::createFromFormat('Y-m-d', $data);
         return $d && $d->format('Y-m-d') === $data;
     }
 
@@ -83,13 +84,13 @@
         int $idadeMinima = 18,
         int $idadeMaxima = 121
     ): bool {
-        $dataNascimento = DateTime::createFromFormat('Y-m-d', $data);
+        $dataNascimento = \DateTime::createFromFormat('Y-m-d', $data);
 
         if(!$dataNascimento || $dataNascimento->format('Y-m-d') !== $data) {
             return false;
         }
 
-        $hoje = new DateTime();
+        $hoje = new \DateTime();
         $idade = $hoje->diff($dataNascimento)->y;
 
         return $idade >= $idadeMinima && $idade <= $idadeMaxima;

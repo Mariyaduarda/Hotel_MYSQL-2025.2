@@ -1,9 +1,19 @@
 <?php
 
-require_once __DIR__ . '/../model/Hospede.php';
+namespace Router;
+
+require_once __DIR__ . '/../model/Hospede.php';   
 require_once __DIR__ . '/../model/Pessoa.php';
 require_once __DIR__ . '/../model/Endereco.php';
 require_once __DIR__ . '/../database/Database.php';
+require_once __DIR__ . '/../utils/Validacoes.php';
+
+use Utils\Validacoes;
+use database\Database;
+use Router\Hospede;
+use Router\Pessoa;
+use Router\Endereco;
+$db = new Database(); 
 
 class HospedeController {
     private $db;
@@ -14,12 +24,52 @@ class HospedeController {
     public function __construct() {
         $database = new Database();
         $this->db = $database->getConnection();
-        $this->hospede = new Hospede($this->db);
-        $this->pessoa = new Pessoa($this->db);
-        $this->endereco = new Endereco($this->db);
+        $this->hospede = \new Hospede($this->db);
+        $this->pessoa = \new Pessoa($this->db);
+        $this->endereco = \new Endereco($this->db);
     }
 
     public function criar(array $dados): array {
+
+        $erros = [];
+
+    if (!Validacoes::validarNome($dados['nome'] ?? '')) {
+        $erros[] = "Nome inválido.";
+    }
+
+    if (!empty($dados['email']) && !Validacoes::validarEmail($dados['email'])) {
+        $erros[] = "Email inválido.";
+    }
+
+    if (!empty($dados['telefone']) && !Validacoes::validarTelefone($dados['telefone'])) {
+        $erros[] = "Telefone inválido.";
+    }
+
+    if (!empty($dados['data_nascimento']) && !Validacoes::validarDataNascimento($dados['data_nascimento'])) {
+        $erros[] = "Data de nascimento inválida (mínimo 18 anos).";
+    }
+
+    if (!empty($dados['documento']) && !Validacoes::validarCPF($dados['documento'])) {
+        $erros[] = "CPF inválido.";
+    }
+
+    if (!empty($dados['cidade']) && !Validacoes::validarTexto($dados['cidade'])) {
+        $erros[] = "Cidade inválida.";
+    }
+
+    if (!empty($dados['estado']) && !Validacoes::validarTexto($dados['estado'], 2, 2)) {
+        $erros[] = "Estado deve ter exatamente 2 letras.";
+    }
+
+    if (!empty($dados['cep']) && strlen(preg_replace('/\D/', '', $dados['cep'])) !== 8) {
+        $erros[] = "CEP inválido.";
+    }
+
+    // Retornar caso existam erros
+    if (!empty($erros)) {
+        return ['sucesso' => false, 'erros' => $erros];
+    }
+
         try {
             $this->db->beginTransaction();
 

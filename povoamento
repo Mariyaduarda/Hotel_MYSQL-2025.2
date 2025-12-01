@@ -1,0 +1,297 @@
+-- ========================================
+-- SCRIPT DE POVOAMENTO - SISTEMA HOTEL
+-- Mínimo de 10 registros por tabela
+-- ========================================
+
+USE mydb;
+
+-- Limpar tabelas na ordem correta (respeitar foreign keys)
+SET FOREIGN_KEY_CHECKS=0;
+TRUNCATE TABLE item_has_consumo;
+TRUNCATE TABLE consumo;
+TRUNCATE TABLE pagamento;
+TRUNCATE TABLE quarto_luxo;
+TRUNCATE TABLE reserva;
+TRUNCATE TABLE quarto;
+TRUNCATE TABLE funcionario;
+TRUNCATE TABLE hospede;
+TRUNCATE TABLE pessoa;
+TRUNCATE TABLE endereco;
+TRUNCATE TABLE item;
+SET FOREIGN_KEY_CHECKS=1;
+
+-- ========================================
+-- TABELA ENDERECO (15 registros)
+-- ========================================
+INSERT INTO endereco (logradouro, numero, bairro, cidade, estado, pais, cep) VALUES
+('Rua das Flores', 100, 'Centro', 'Formiga', 'MG', 'Brasil', '35570-000'),
+('Av. Principal', 250, 'Jardim', 'Formiga', 'MG', 'Brasil', '35570-100'),
+('Rua do Comércio', 350, 'Centro', 'Formiga', 'MG', 'Brasil', '35570-050'),
+('Av. Brasil', 500, 'Industrial', 'Divinópolis', 'MG', 'Brasil', '35500-000'),
+('Rua Santa Rita', 75, 'São José', 'Formiga', 'MG', 'Brasil', '35570-200'),
+('Av. Atlântica', 1500, 'Copacabana', 'Rio de Janeiro', 'RJ', 'Brasil', '22021-000'),
+('Rua Augusta', 2000, 'Consolação', 'São Paulo', 'SP', 'Brasil', '01305-100'),
+('Av. Paulista', 1000, 'Bela Vista', 'São Paulo', 'SP', 'Brasil', '01310-100'),
+('Rua das Palmeiras', 450, 'Botafogo', 'Rio de Janeiro', 'RJ', 'Brasil', '22280-000'),
+('Av. Boa Viagem', 3000, 'Boa Viagem', 'Recife', 'PE', 'Brasil', '51020-000'),
+('Rua Padre Chagas', 500, 'Moinhos de Vento', 'Porto Alegre', 'RS', 'Brasil', '90570-080'),
+('Av. Beira Mar', 1200, 'Meireles', 'Fortaleza', 'CE', 'Brasil', '60165-121'),
+('Rua da Praia', 800, 'Centro', 'Florianópolis', 'SC', 'Brasil', '88010-400'),
+('Av. Central', 150, 'Vila Nova', 'Formiga', 'MG', 'Brasil', '35570-300'),
+('Rua Tiradentes', 220, 'Centro', 'Formiga', 'MG', 'Brasil', '35570-020');
+
+-- ========================================
+-- TABELA PESSOA (25 registros - 15 hóspedes + 10 funcionários)
+-- ========================================
+INSERT INTO pessoa (nome, sexo, data_nascimento, documento, telefone, email, tipo_pessoa, endereco_id_endereco) VALUES
+-- Hóspedes
+('João Silva Santos', 'M', '1985-03-15', '123.456.789-00', '(37) 99999-0001', 'joao.silva@email.com', 'hospede', 1),
+('Maria Oliveira Costa', 'F', '1990-07-22', '234.567.890-11', '(37) 99999-0002', 'maria.oliveira@email.com', 'hospede', 2),
+('Carlos Pereira Lima', 'M', '1978-11-30', '345.678.901-22', '(37) 99999-0003', 'carlos.pereira@email.com', 'hospede', 3),
+('Ana Paula Souza', 'F', '1995-05-10', '456.789.012-33', '(21) 98888-0001', 'ana.souza@email.com', 'hospede', 6),
+('Roberto Alves Mendes', 'M', '1982-09-25', '567.890.123-44', '(11) 97777-0001', 'roberto.mendes@email.com', 'hospede', 7),
+('Juliana Costa Ribeiro', 'F', '1988-02-14', '678.901.234-55', '(21) 96666-0001', 'juliana.ribeiro@email.com', 'hospede', 9),
+('Fernando Santos Rocha', 'M', '1992-12-05', '789.012.345-66', '(81) 95555-0001', 'fernando.rocha@email.com', 'hospede', 10),
+('Patrícia Lima Dias', 'F', '1987-06-18', '890.123.456-77', '(51) 94444-0001', 'patricia.dias@email.com', 'hospede', 11),
+('Ricardo Fernandes Cruz', 'M', '1980-04-20', '901.234.567-88', '(85) 93333-0001', 'ricardo.cruz@email.com', 'hospede', 12),
+('Camila Rodrigues Nunes', 'F', '1993-08-08', '012.345.678-99', '(48) 92222-0001', 'camila.nunes@email.com', 'hospede', 13),
+('Lucas Martins Araújo', 'M', '1991-01-12', '111.222.333-44', '(37) 99999-0004', 'lucas.araujo@email.com', 'hospede', 4),
+('Beatriz Almeida Pinto', 'F', '1986-10-30', '222.333.444-55', '(37) 99999-0005', 'beatriz.pinto@email.com', 'hospede', 5),
+('Gabriel Costa Freitas', 'M', '1994-03-25', '333.444.555-66', '(11) 98888-0002', 'gabriel.freitas@email.com', 'hospede', 8),
+('Larissa Santos Barros', 'F', '1989-07-15', '444.555.666-77', '(37) 99999-0006', 'larissa.barros@email.com', 'hospede', 14),
+('Thiago Oliveira Melo', 'M', '1983-11-28', '555.666.777-88', '(37) 99999-0007', 'thiago.melo@email.com', 'hospede', 15),
+
+-- Funcionários
+('Pedro Henrique Souza', 'M', '1990-05-20', '100.200.300-40', '(37) 98888-0001', 'pedro.souza@hotel.com', 'funcionario', 1),
+('Amanda Silva Costa', 'F', '1992-08-15', '200.300.400-50', '(37) 98888-0002', 'amanda.costa@hotel.com', 'funcionario', 2),
+('Rafael Oliveira Dias', 'M', '1988-03-10', '300.400.500-60', '(37) 98888-0003', 'rafael.dias@hotel.com', 'funcionario', 3),
+('Fernanda Lima Santos', 'F', '1991-12-25', '400.500.600-70', '(37) 98888-0004', 'fernanda.santos@hotel.com', 'funcionario', 4),
+('Bruno Costa Alves', 'M', '1987-07-30', '500.600.700-80', '(37) 98888-0005', 'bruno.alves@hotel.com', 'funcionario', 5),
+('Carolina Pereira Ramos', 'F', '1993-09-12', '600.700.800-90', '(37) 98888-0006', 'carolina.ramos@hotel.com', 'funcionario', 14),
+('Rodrigo Martins Silva', 'M', '1989-04-18', '700.800.900-00', '(37) 98888-0007', 'rodrigo.silva@hotel.com', 'funcionario', 15),
+('Isabela Santos Nunes', 'F', '1994-11-22', '800.900.000-11', '(37) 98888-0008', 'isabela.nunes@hotel.com', 'funcionario', 1),
+('Guilherme Rocha Pinto', 'M', '1986-06-08', '900.000.111-22', '(37) 98888-0009', 'guilherme.pinto@hotel.com', 'funcionario', 2),
+('Mariana Alves Cardoso', 'F', '1990-02-14', '000.111.222-33', '(37) 98888-0010', 'mariana.cardoso@hotel.com', 'funcionario', 3);
+
+-- ========================================
+-- TABELA HOSPEDE (15 registros)
+-- ========================================
+INSERT INTO hospede (id_pessoa, preferencias, historico) VALUES
+(1, 'Quarto silencioso, andar alto', 'Cliente regular, 5 estadias'),
+(2, 'Vista para o mar, café reforçado', 'Primeira estadia'),
+(3, 'Cama king size, ar condicionado', 'Cliente VIP, 12 estadias'),
+(4, 'Quarto com varanda', 'Cliente regular, 3 estadias'),
+(5, 'Andar térreo, próximo elevador', 'Segunda estadia'),
+(6, 'Minibar completo, TV a cabo', 'Cliente regular, 7 estadias'),
+(7, 'Quarto para não fumantes', 'Primeira estadia'),
+(8, 'Berço infantil, frigobar', 'Cliente regular, 4 estadias'),
+(9, 'Hidromassagem, vista panorâmica', 'Cliente VIP, 15 estadias'),
+(10, 'Quarto silencioso, café da manhã', 'Segunda estadia'),
+(11, 'Wi-Fi de alta velocidade', 'Terceira estadia'),
+(12, 'Quarto acessível, térreo', 'Cliente regular, 6 estadias'),
+(13, 'Cama extra, frigobar', 'Primeira estadia'),
+(14, 'Vista jardim, varanda ampla', 'Cliente VIP, 10 estadias'),
+(15, 'Quarto duplo, ar condicionado', 'Cliente regular, 8 estadias');
+
+-- ========================================
+-- TABELA FUNCIONARIO (10 registros)
+-- ========================================
+INSERT INTO funcionario (id_pessoa, cargo, salario, data_contratacao, numero_ctps, turno) VALUES
+(16, 'Recepcionista', 2500.00, '2023-01-15', 123456, 'Manhã'),
+(17, 'Recepcionista', 2500.00, '2023-03-20', 234567, 'Tarde'),
+(18, 'Gerente', 5500.00, '2022-06-10', 345678, 'Integral'),
+(19, 'Camareira', 1800.00, '2023-05-05', 456789, 'Manhã'),
+(20, 'Camareiro', 1800.00, '2023-07-12', 567890, 'Tarde'),
+(21, 'Concierge', 3000.00, '2022-11-20', 678901, 'Noite'),
+(22, 'Supervisor de Limpeza', 3200.00, '2022-09-15', 789012, 'Manhã'),
+(23, 'Atendente de Reservas', 2200.00, '2023-02-28', 890123, 'Integral'),
+(24, 'Auxiliar Administrativo', 2000.00, '2023-08-10', 901234, 'Tarde'),
+(25, 'Coordenador de Eventos', 4000.00, '2022-12-01', 012345, 'Integral');
+
+-- ========================================
+-- TABELA QUARTO (20 registros)
+-- ========================================
+INSERT INTO quarto (status, numero, andar, descricao, valor_diaria, capacidade_maxima, tipo_quarto) VALUES
+('disponivel', 101, 1, 'Quarto Standard com cama casal', 150.00, 2, 'Standard'),
+('disponivel', 102, 1, 'Quarto Standard com duas camas', 150.00, 2, 'Standard'),
+('ocupado', 103, 1, 'Quarto Standard com cama casal', 150.00, 2, 'Standard'),
+('disponivel', 104, 1, 'Quarto Standard triplo', 180.00, 3, 'Standard'),
+('manutencao', 105, 1, 'Quarto Standard com varanda', 170.00, 2, 'Standard'),
+('disponivel', 201, 2, 'Quarto Superior com vista jardim', 220.00, 2, 'Superior'),
+('ocupado', 202, 2, 'Quarto Superior cama king', 220.00, 2, 'Superior'),
+('disponivel', 203, 2, 'Quarto Superior duplo', 220.00, 2, 'Superior'),
+('disponivel', 204, 2, 'Quarto Superior com varanda', 240.00, 2, 'Superior'),
+('ocupado', 205, 2, 'Quarto Superior triplo', 260.00, 3, 'Superior'),
+('disponivel', 301, 3, 'Suíte Luxo com hidromassagem', 450.00, 2, 'Luxo'),
+('disponivel', 302, 3, 'Suíte Luxo vista mar', 500.00, 2, 'Luxo'),
+('ocupado', 303, 3, 'Suíte Luxo completa', 480.00, 2, 'Luxo'),
+('disponivel', 304, 3, 'Suíte Luxo presidencial', 600.00, 4, 'Luxo'),
+('disponivel', 305, 3, 'Suíte Luxo com varanda ampla', 520.00, 2, 'Luxo'),
+('disponivel', 401, 4, 'Cobertura duplex', 800.00, 4, 'Cobertura'),
+('disponivel', 402, 4, 'Cobertura com piscina privativa', 1000.00, 6, 'Cobertura'),
+('disponivel', 106, 1, 'Quarto Standard econômico', 130.00, 2, 'Standard'),
+('disponivel', 206, 2, 'Quarto Superior familiar', 280.00, 4, 'Superior'),
+('disponivel', 306, 3, 'Suíte Luxo romântica', 550.00, 2, 'Luxo');
+
+-- ========================================
+-- TABELA QUARTO_LUXO (8 registros)
+-- ========================================
+INSERT INTO quarto_luxo (quarto_id_quarto, possui_hidromassagem, possui_vista_mar) VALUES
+(11, 'Sim', 'Não'),
+(12, 'Não', 'Sim'),
+(13, 'Sim', 'Sim'),
+(14, 'Sim', 'Não'),
+(15, 'Não', 'Sim'),
+(16, 'Sim', 'Sim'),
+(17, 'Sim', 'Sim'),
+(20, 'Sim', 'Não');
+
+-- ========================================
+-- TABELA RESERVA (18 registros)
+-- ========================================
+INSERT INTO reserva (valor_reserva, data_reserva, data_checkin_previsto, data_checkout_previsto, status, id_funcionario, id_hospede, id_quarto) VALUES
+(450.00, '2024-10-01', '2024-10-15', '2024-10-18', 'confirmada', 16, 1, 1),
+(660.00, '2024-10-05', '2024-10-20', '2024-10-23', 'confirmada', 17, 2, 6),
+(1350.00, '2024-09-20', '2024-10-10', '2024-10-13', 'finalizada', 18, 3, 11),
+(750.00, '2024-11-01', '2024-11-15', '2024-11-20', 'confirmada', 16, 4, 3),
+(1440.00, '2024-10-28', '2024-11-10', '2024-11-13', 'confirmada', 23, 5, 13),
+(1000.00, '2024-09-15', '2024-09-25', '2024-09-27', 'finalizada', 17, 6, 12),
+(440.00, '2024-11-05', '2024-11-20', '2024-11-22', 'pendente', 16, 7, 7),
+(780.00, '2024-10-12', '2024-10-25', '2024-10-28', 'confirmada', 23, 8, 10),
+(1600.00, '2024-09-10', '2024-09-18', '2024-09-22', 'finalizada', 18, 9, 14),
+(300.00, '2024-11-08', '2024-11-22', '2024-11-24', 'pendente', 17, 10, 2),
+(900.00, '2024-10-18', '2024-11-01', '2024-11-05', 'confirmada', 16, 11, 9),
+(510.00, '2024-09-25', '2024-10-05', '2024-10-08', 'finalizada', 23, 12, 4),
+(1040.00, '2024-11-02', '2024-11-18', '2024-11-20', 'confirmada', 17, 13, 15),
+(600.00, '2024-10-22', '2024-11-05', '2024-11-08', 'confirmada', 18, 14, 8),
+(360.00, '2024-11-10', '2024-11-25', '2024-11-27', 'pendente', 16, 15, 18),
+(1200.00, '2024-09-05', '2024-09-12', '2024-09-14', 'finalizada', 23, 3, 16),
+(840.00, '2024-10-30', '2024-11-12', '2024-11-16', 'confirmada', 17, 6, 19),
+(1650.00, '2024-11-01', '2024-11-16', '2024-11-19', 'confirmada', 18, 9, 20);
+
+-- ========================================
+-- TABELA ITEM (15 registros)
+-- ========================================
+INSERT INTO item (nome, valor, descricao) VALUES
+('Água Mineral 500ml', 5.00, 'Água mineral sem gás'),
+('Refrigerante Lata', 7.00, 'Refrigerante variados'),
+('Cerveja Long Neck', 12.00, 'Cerveja nacional'),
+('Vinho Tinto', 80.00, 'Vinho tinto reserva'),
+('Champagne', 180.00, 'Champagne importado'),
+('Sanduíche Natural', 18.00, 'Sanduíche de frango'),
+('Hambúrguer Artesanal', 35.00, 'Hambúrguer com fritas'),
+('Pizza Individual', 42.00, 'Pizza sabor à escolha'),
+('Salada Caesar', 28.00, 'Salada completa'),
+('Suco Natural', 12.00, 'Suco de frutas naturais'),
+('Café Expresso', 8.00, 'Café expresso tradicional'),
+('Chocolate Premium', 25.00, 'Caixa de bombons'),
+('Água com Gás', 6.00, 'Água mineral com gás'),
+('Energético', 15.00, 'Bebida energética'),
+('Sorvete Premium', 22.00, 'Sorvete artesanal 500ml');
+
+-- ========================================
+-- TABELA CONSUMO (20 registros)
+-- ========================================
+INSERT INTO consumo (data_consumo, valor_consumacao, reserva_idreserva) VALUES
+('2024-10-15', 45.00, 1),
+('2024-10-16', 85.00, 1),
+('2024-10-20', 120.00, 2),
+('2024-10-21', 95.00, 2),
+('2024-10-10', 200.00, 3),
+('2024-10-11', 150.00, 3),
+('2024-11-15', 75.00, 4),
+('2024-11-10', 180.00, 5),
+('2024-09-25', 250.00, 6),
+('2024-10-25', 90.00, 8),
+('2024-10-26', 110.00, 8),
+('2024-09-18', 300.00, 9),
+('2024-09-20', 220.00, 9),
+('2024-11-01', 65.00, 11),
+('2024-10-05', 88.00, 12),
+('2024-11-18', 145.00, 13),
+('2024-11-05', 105.00, 14),
+('2024-09-12', 190.00, 16),
+('2024-11-12', 125.00, 17),
+('2024-11-16', 280.00, 18);
+
+-- ========================================
+-- TABELA ITEM_HAS_CONSUMO (35 registros)
+-- ========================================
+INSERT INTO item_has_consumo (item_id_item, consumo_id_consumo, quantidade) VALUES
+(1, 1, 3),  -- 3 águas
+(2, 1, 2),  -- 2 refrigerantes
+(3, 1, 2),  -- 2 cervejas
+(6, 2, 2),  -- 2 sanduíches
+(7, 2, 1),  -- 1 hambúrguer
+(10, 2, 2), -- 2 sucos
+(3, 3, 4),  -- 4 cervejas
+(4, 3, 1),  -- 1 vinho
+(8, 3, 1),  -- 1 pizza
+(2, 4, 3),  -- 3 refrigerantes
+(6, 4, 3),  -- 3 sanduíches
+(11, 4, 4), -- 4 cafés
+(5, 5, 1),  -- 1 champagne
+(12, 5, 1), -- 1 chocolate
+(4, 6, 1),  -- 1 vinho
+(7, 6, 2),  -- 2 hambúrgueres
+(9, 6, 2),  -- 2 saladas
+(1, 7, 5),  -- 5 águas
+(3, 7, 3),  -- 3 cervejas
+(5, 8, 1),  -- 1 champagne
+(8, 9, 3),  -- 3 pizzas
+(4, 9, 2),  -- 2 vinhos
+(10, 10, 4), -- 4 sucos
+(6, 10, 3),  -- 3 sanduíches
+(7, 11, 2),  -- 2 hambúrgueres
+(2, 11, 3),  -- 3 refrigerantes
+(5, 12, 1),  -- 1 champagne
+(4, 12, 1),  -- 1 vinho
+(8, 12, 2),  -- 2 pizzas
+(3, 13, 8),  -- 8 cervejas
+(9, 13, 4),  -- 4 saladas
+(1, 14, 6),  -- 6 águas
+(14, 14, 2), -- 2 energéticos
+(6, 15, 4),  -- 4 sanduíches
+(15, 15, 2); -- 2 sorvetes
+
+-- ========================================
+-- TABELA PAGAMENTO (12 registros)
+-- ========================================
+INSERT INTO pagamento (data_pagamento, valor_total, metodo_pagamento, reserva_idreserva) VALUES
+('2024-10-18', 580.00, 'Cartão de Crédito', 1),
+('2024-10-23', 875.00, 'PIX', 2),
+('2024-10-13', 1700.00, 'Cartão de Débito', 3),
+('2024-09-27', 1250.00, 'Dinheiro', 6),
+('2024-10-28', 200.00, 'Cartão de Crédito', 8),
+('2024-09-22', 2120.00, 'Transferência', 9),
+('2024-10-08', 598.00, 'PIX', 12),
+('2024-09-14', 1390.00, 'Cartão de Crédito', 16),
+('2024-11-05', 145.00, 'PIX', 11),
+('2024-11-08', 705.00, 'Cartão de Débito', 14),
+('2024-11-18', 1185.00, 'Cartão de Crédito', 13),
+('2024-11-16', 405.00, 'PIX', 17);
+
+-- ========================================
+-- VERIFICAÇÃO DOS DADOS INSERIDOS
+-- ========================================
+SELECT 'ENDERECOS' AS Tabela, COUNT(*) AS Total FROM endereco
+UNION ALL
+SELECT 'PESSOAS', COUNT(*) FROM pessoa
+UNION ALL
+SELECT 'HOSPEDES', COUNT(*) FROM hospede
+UNION ALL
+SELECT 'FUNCIONARIOS', COUNT(*) FROM funcionario
+UNION ALL
+SELECT 'QUARTOS', COUNT(*) FROM quarto
+UNION ALL
+SELECT 'QUARTOS LUXO', COUNT(*) FROM quarto_luxo
+UNION ALL
+SELECT 'RESERVAS', COUNT(*) FROM reserva
+UNION ALL
+SELECT 'ITENS', COUNT(*) FROM item
+UNION ALL
+SELECT 'CONSUMOS', COUNT(*) FROM consumo
+UNION ALL
+SELECT 'ITENS CONSUMIDOS', COUNT(*) FROM item_has_consumo
+UNION ALL
+SELECT 'PAGAMENTOS', COUNT(*) FROM pagamento;

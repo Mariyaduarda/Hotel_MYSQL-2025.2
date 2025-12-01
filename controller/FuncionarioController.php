@@ -1,5 +1,7 @@
 <?php
 
+namespace Router;
+
 require_once __DIR__ . '/../model/Funcionario.php';
 require_once __DIR__ . '/../model/Pessoa.php';
 require_once __DIR__ . '/../model/Endereco.php';

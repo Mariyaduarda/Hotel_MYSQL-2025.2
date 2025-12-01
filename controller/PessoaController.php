@@ -1,7 +1,14 @@
 <?php
 
+namespace Router;
+
+require_once __DIR__ . '/../model/Hospede.php';
 require_once __DIR__ . '/../model/Pessoa.php';
 require_once __DIR__ . '/../database/Database.php';
+
+use database\Database;
+use Router\Pessoa;
+$db = new Database(); 
 
 class PessoaController {
     private $db;
@@ -10,7 +17,7 @@ class PessoaController {
     public function __construct() {
         $database = new Database();
         $this->db = $database->getConnection();
-        $this->pessoa = new Pessoa($this->db);
+        $this->pessoa = \new Pessoa($this->db);
     }
 
     public function criar(array $dados): array {

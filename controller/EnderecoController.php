@@ -1,7 +1,15 @@
 <?php
 
+namespace Router;
+
 require_once __DIR__ . '/../model/Endereco.php';
 require_once __DIR__ . '/../database/Database.php';
+
+use database\Database;
+use Router\Hospede;
+use Router\Pessoa;
+use Router\Endereco;
+$db = new Database();
 
 class EnderecoController {
     private $db;

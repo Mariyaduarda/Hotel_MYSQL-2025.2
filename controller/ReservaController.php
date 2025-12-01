@@ -1,5 +1,7 @@
 <?php
 
+namespace Router;
+
 require_once __DIR__ . '/../model/Reserva.php';
 require_once __DIR__ . '/../model/Quarto.php';
 require_once __DIR__ . '/../database/Database.php';
@@ -12,7 +14,7 @@ class ReservaController {
     public function __construct() {
         $database = new Database();
         $this->db = $database->getConnection();
-        $this->reserva = new Reserva($this->db);
+        $this->reserva = new \Reserva($this->db);
         $this->quarto = new Quarto($this->db);
     }
 
