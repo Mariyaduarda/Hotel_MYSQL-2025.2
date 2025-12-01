@@ -1,18 +1,22 @@
 <?php
 
+namespace model;
+
+require_once __DIR__ . '/../database/Database.php';
+
 class Reserva {
     private $conn;
     private string $table_name = "reserva";
 
-    private ?int $idreserva = null;
-    private ?float $valor_reserva = null;
+    private ?int    $idreserva = null;
+    private ?float  $valor_reserva = null;
     private ?string $data_reserva = null;
     private ?string $data_checkin_previsto = null;
     private ?string $data_checkout_previsto = null;
-    private string $status = 'pendente';
-    private int $id_funcionario;
-    private int $id_hospede;
-    private int $id_quarto;
+    private string  $status = 'pendente';
+    private int     $id_funcionario;
+    private int     $id_hospede;
+    private int     $id_quarto;
 
     private const STATUS_VALIDOS = ['pendente', 'confirmada', 'cancelada', 'concluida', 'em_andamento'];
 

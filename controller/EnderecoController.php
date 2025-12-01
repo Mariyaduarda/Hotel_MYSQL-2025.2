@@ -1,7 +1,13 @@
 <?php
 
+namespace Controller;
+
 require_once __DIR__ . '/../model/Endereco.php';
 require_once __DIR__ . '/../database/Database.php';
+
+use database\Database;
+use model\Endereco;
+$db = new Database(); 
 
 class EnderecoController {
     private $db;

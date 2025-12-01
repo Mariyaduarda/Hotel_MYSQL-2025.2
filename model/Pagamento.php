@@ -1,14 +1,18 @@
 <?php
 
+namespace model;
+
+require_once __DIR__ . '/../database/Database.php';
+
 class Pagamento {
     private $conn;
     private string $table_name = "pagamento";
 
-    private ?int $id_pagamento = null;
+    private ?int    $id_pagamento = null;
     private ?string $data_pagamento = null;
-    private ?float $valor_total = null;
+    private ?float  $valor_total = null;
     private ?string $metodo_pagamento = null;
-    private int $reserva_idreserva;
+    private int     $reserva_idreserva;
 
     private const METODOS_VALIDOS = ['Dinheiro', 'Cartão de Crédito', 'Cartão de Débito', 'PIX', 'Transferência'];
 

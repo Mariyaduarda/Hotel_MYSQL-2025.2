@@ -1,12 +1,15 @@
 <?php
 
+namespace model;
+
+require_once __DIR__ . '/../database/Database.php';
 require_once __DIR__ . '/../model/Pessoa.php';
 
 class Hospede {
     private $conn;
     private string $table_name = "hospede";
 
-    private int $id_pessoa;
+    private int     $id_pessoa;
     private ?string $preferencias = null;
     private ?string $historico = null;
 

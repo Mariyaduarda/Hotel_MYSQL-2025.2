@@ -1,5 +1,8 @@
 <?php
 
+namespace model;
+
+require_once __DIR__ . '/../database/Database.php';
 require_once __DIR__ . '/../utils/Validacoes.php';
 require_once __DIR__ . '/../model/Endereco.php';
 
@@ -7,7 +10,7 @@ class Pessoa {
     private $conn;
     private string $table_name = "pessoa";
 
-    private ?int $id_pessoa = null;
+    private ?int    $id_pessoa = null;
     private ?string $nome = null;
     private ?string $sexo = null;
     private ?string $data_nascimento = null;
@@ -15,7 +18,7 @@ class Pessoa {
     private ?string $telefone = null;
     private ?string $email = null;
     private ?string $tipo_pessoa = null;
-    private int $endereco_id_endereco;
+    private ?int     $endereco_id_endereco = null;
 
     private const SEXOS_VALIDOS = ['M', 'F', 'Outro'];
     private const TIPOS_VALIDOS = ['hospede', 'funcionario'];

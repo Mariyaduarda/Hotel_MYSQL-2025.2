@@ -1,13 +1,17 @@
 <?php
 
+namespace model;
+
+require_once __DIR__ . '/../database/Database.php';
+
 class Consumo {
     private $conn;
     private string $table_name = "consumo";
 
-    private ?int $id_consumo = null;
+    private ?int    $id_consumo = null;
     private ?string $data_consumo = null;
-    private ?float $valor_consumacao = null;
-    private int $reserva_idreserva;
+    private ?float  $valor_consumacao = null;
+    private int     $reserva_idreserva;
 
     public function __construct($db){
         $this->conn = $db;

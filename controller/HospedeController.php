@@ -1,9 +1,19 @@
 <?php
 
+namespace Controller;
+
 require_once __DIR__ . '/../model/Hospede.php';
 require_once __DIR__ . '/../model/Pessoa.php';
 require_once __DIR__ . '/../model/Endereco.php';
 require_once __DIR__ . '/../database/Database.php';
+
+use PDO;
+use Exception;
+use database\Database;
+use model\Hospede;  
+use model\Pessoa;
+use model\Endereco;
+$db = new Database();
 
 class HospedeController {
     private $db;

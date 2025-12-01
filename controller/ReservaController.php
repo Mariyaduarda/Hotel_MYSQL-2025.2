@@ -1,5 +1,7 @@
 <?php
 
+namespace Controller;
+
 require_once __DIR__ . '/../model/Reserva.php';
 require_once __DIR__ . '/../model/Quarto.php';
 require_once __DIR__ . '/../database/Database.php';

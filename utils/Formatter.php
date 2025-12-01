@@ -1,81 +1,160 @@
 <?php
 
 class Formatter {
-
-    // FORMATA DATA PARA DD/MM/YYYY
-    public static function formatarData(string $data): string 
-    {
-        $d = DateTime::createFromFormat('Y-m-d', $data);
-        return $d ? $d->format('d/m/Y') : '';
+    
+    /**
+     * Formata CPF no padrão 000.000.000-00
+     */
+    public static function formatarCPF(?string $cpf): string {
+        if (empty($cpf)) {
+            return '-';
+        }
+        
+        $cpf = preg_replace('/[^0-9]/', '', $cpf);
+        
+        if (strlen($cpf) != 11) {
+            return $cpf;
+        }
+        
+        return substr($cpf, 0, 3) . '.' . 
+               substr($cpf, 3, 3) . '.' . 
+               substr($cpf, 6, 3) . '-' . 
+               substr($cpf, 9, 2);
     }
     
-    // FORMATA MOEDA PARA PADRÃO BRASILEIRO
-    public static function formatarMoeda(float $valor, bool $simbolo = true): string 
-    {
-         $formatado = number_format($valor, 2, ',', '.');
-        return $simbolo ? "R$ {$formatado}" : $formatado;
-    }
-
-    // FORMATA CPF (000.000.000-00)
-    public static function formatarCPF(string $cpf): string 
-    {
-        $numeros = preg_replace('/[^0-9]/', '', $cpf);
-        if (strlen($numeros) != 11) {
-            return $cpf; // retorna original se não tiver 11 dígitos
+    /**
+     * Formata telefone no padrão (00) 00000-0000
+     */
+    public static function formatarTelefone(?string $telefone): string {
+        if (empty($telefone)) {
+            return '-';
         }
-        return substr($numeros, 0, 3) . '.' .
-               substr($numeros, 3, 3) . '.' .
-               substr($numeros, 6, 3) . '-' .
-               substr($numeros, 9, 2);
-    }
-
-    // FORMATA TELEFONE (99) 99999-9999
-    public static function formatarTelefone(string $telefone): string {
+        
         $telefone = preg_replace('/[^0-9]/', '', $telefone);
         
-        if (strlen($telefone) === 11) {
-            // Celular: (11) 98765-4321
+        // Celular (11 dígitos)
+        if (strlen($telefone) == 11) {
             return '(' . substr($telefone, 0, 2) . ') ' . 
                    substr($telefone, 2, 5) . '-' . 
-                   substr($telefone, 7);
-        } elseif (strlen($telefone) === 10) {
-            // Fixo: (11) 3456-7890
+                   substr($telefone, 7, 4);
+        }
+        
+        // Fixo (10 dígitos)
+        if (strlen($telefone) == 10) {
             return '(' . substr($telefone, 0, 2) . ') ' . 
                    substr($telefone, 2, 4) . '-' . 
-                   substr($telefone, 6);
+                   substr($telefone, 6, 4);
         }
         
         return $telefone;
     }
- 
-    // FORMATA STATUS COM BADGE HTML
-     public static function formatarStatusBadge(string $status): string {
-        $classes = [
-            'disponivel' => 'success',
-            'ocupado' => 'danger',
-            'manutencao' => 'warning',
-            'confirmada' => 'success',
-            'pendente' => 'warning',
-            'cancelada' => 'danger',
-            'concluida' => 'info'
-        ];
+    
+    /**
+     * Formata CEP no padrão 00000-000
+     */
+    public static function formatarCEP(?string $cep): string {
+        if (empty($cep)) {
+            return '-';
+        }
         
-        $textos = [
-            'disponivel' => 'Disponível',
-            'ocupado' => 'Ocupado',
-            'manutencao' => 'Manutenção',
-            'confirmada' => 'Confirmada',
-            'pendente' => 'Pendente',
-            'cancelada' => 'Cancelada',
-            'concluida' => 'Concluída'
-        ];
+        $cep = preg_replace('/[^0-9]/', '', $cep);
         
-        $classe = $classes[$status] ?? 'secondary';
-        $texto = $textos[$status] ?? ucfirst($status);
+        if (strlen($cep) != 8) {
+            return $cep;
+        }
         
-        return "<span class=\"badge badge-{$classe}\">{$texto}</span>";
+        return substr($cep, 0, 5) . '-' . substr($cep, 5, 3);
     }
-
+    
+    /**
+     * Formata data no padrão brasileiro dd/mm/yyyy
+     */
+    public static function formatarData(?string $data): string {
+        if (empty($data)) {
+            return '-';
+        }
+        
+        $timestamp = strtotime($data);
+        if ($timestamp === false) {
+            return $data;
+        }
+        
+        return date('d/m/Y', $timestamp);
+    }
+    
+    /**
+     * Formata data e hora no padrão brasileiro dd/mm/yyyy HH:mm
+     */
+    public static function formatarDataHora(?string $data): string {
+        if (empty($data)) {
+            return '-';
+        }
+        
+        $timestamp = strtotime($data);
+        if ($timestamp === false) {
+            return $data;
+        }
+        
+        return date('d/m/Y H:i', $timestamp);
+    }
+    
+    /**
+     * Formata valor monetário no padrão brasileiro
+     */
+    public static function formatarDinheiro(?float $valor): string {
+        if ($valor === null) {
+            return 'R$ 0,00';
+        }
+        
+        return 'R$ ' . number_format($valor, 2, ',', '.');
+    }
+    
+    /**
+     * Remove formatação de CPF
+     */
+    public static function limparCPF(?string $cpf): ?string {
+        if (empty($cpf)) {
+            return null;
+        }
+        
+        return preg_replace('/[^0-9]/', '', $cpf);
+    }
+    
+    /**
+     * Remove formatação de telefone
+     */
+    public static function limparTelefone(?string $telefone): ?string {
+        if (empty($telefone)) {
+            return null;
+        }
+        
+        return preg_replace('/[^0-9]/', '', $telefone);
+    }
+    
+    /**
+     * Remove formatação de CEP
+     */
+    public static function limparCEP(?string $cep): ?string {
+        if (empty($cep)) {
+            return null;
+        }
+        
+        return preg_replace('/[^0-9]/', '', $cep);
+    }
+    
+    /**
+     * Trunca texto com reticências
+     */
+    public static function truncar(?string $texto, int $limite = 50): string {
+        if (empty($texto)) {
+            return '-';
+        }
+        
+        if (strlen($texto) <= $limite) {
+            return $texto;
+        }
+        
+        return substr($texto, 0, $limite) . '...';
+    }
 }
-
 ?>

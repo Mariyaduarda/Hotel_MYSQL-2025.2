@@ -1,5 +1,8 @@
 <?php
 
+namespace model;
+
+require_once __DIR__ . '/../database/Database.php';
 require_once __DIR__ . '/../model/Pessoa.php';
 
 class Funcionario {
@@ -57,12 +60,33 @@ class Funcionario {
         return $stmt->execute();
     }
 
-    // READ ALL
+    // READ ALL - CORRIGIDO
     public function read(): \PDOStatement {
-        $query = "SELECT f.*, p.nome, p.email, p.telefone, p.documento
-                  FROM " . $this->table_name . " f
+        $query = "SELECT 
+                    f.id_pessoa AS id,
+                    p.nome,
+                    p.documento AS cpf,
+                    p.email,
+                    p.telefone,
+                    p.sexo,
+                    p.data_nascimento,
+                    e.cidade,
+                    e.estado,
+                    e.logradouro,
+                    e.numero,
+                    e.bairro,
+                    e.cep,
+                    f.cargo,
+                    f.salario,
+                    f.turno,
+                    f.data_contratacao,
+                    f.numero_ctps,
+                    CURRENT_TIMESTAMP as data_criacao
+                  FROM funcionario f
                   INNER JOIN pessoa p ON f.id_pessoa = p.id_pessoa
+                  LEFT JOIN endereco e ON p.endereco_id_endereco = e.id_endereco
                   ORDER BY p.nome ASC";
+
         $stmt = $this->conn->prepare($query);
         $stmt->execute();
         return $stmt;

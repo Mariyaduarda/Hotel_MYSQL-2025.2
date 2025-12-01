@@ -1,9 +1,18 @@
 <?php
 
+namespace Controller;
+
 require_once __DIR__ . '/../model/Funcionario.php';
 require_once __DIR__ . '/../model/Pessoa.php';
 require_once __DIR__ . '/../model/Endereco.php';
 require_once __DIR__ . '/../database/Database.php';
+
+use PDO;
+use Exception;
+use database\Database;
+use model\Funcionario;
+use model\Pessoa;
+use model\Endereco;
 
 class FuncionarioController {
     private $db;
@@ -23,12 +32,12 @@ class FuncionarioController {
         try {
             $this->db->beginTransaction();
 
-            // Criar endereço
-            $this->endereco->setLogradouro($dados['logradouro'] ?? null);
+            // 1. Criar endereço primeiro
+            $this->endereco->setLogradouro($dados['endereco'] ?? null);
             $this->endereco->setNumero($dados['numero'] ?? null);
             $this->endereco->setBairro($dados['bairro'] ?? null);
-            $this->endereco->setCidade($dados['cidade']);
-            $this->endereco->setEstado($dados['estado']);
+            $this->endereco->setCidade($dados['cidade'] ?? null);
+            $this->endereco->setEstado($dados['estado'] ?? null);
             $this->endereco->setPais($dados['pais'] ?? 'Brasil');
             $this->endereco->setCep($dados['cep'] ?? null);
 
@@ -37,33 +46,49 @@ class FuncionarioController {
                 return ['sucesso' => false, 'erros' => ['Erro ao criar endereço.']];
             }
 
-            // Criar pessoa
+            // 2. Criar pessoa com o ID do endereço
             $this->pessoa->setNome($dados['nome']);
             $this->pessoa->setSexo($dados['sexo'] ?? null);
             $this->pessoa->setDataNascimento($dados['data_nascimento'] ?? null);
-            $this->pessoa->setDocumento($dados['documento'] ?? null);
+            $this->pessoa->setDocumento($dados['cpf'] ?? null);
             $this->pessoa->setTelefone($dados['telefone'] ?? null);
             $this->pessoa->setEmail($dados['email'] ?? null);
             $this->pessoa->setTipoPessoa('funcionario');
             $this->pessoa->setEnderecoId($this->endereco->getId());
+
+            // Validar pessoa DEPOIS de setar o endereco_id
+            $errosPessoa = $this->pessoa->validar();
+            if (!empty($errosPessoa)) {
+                $this->db->rollBack();
+                return ['sucesso' => false, 'erros' => $errosPessoa];
+            }
 
             if (!$this->pessoa->create()) {
                 $this->db->rollBack();
                 return ['sucesso' => false, 'erros' => ['Erro ao criar pessoa.']];
             }
 
-            // Criar funcionário
+            // 3. Criar funcionário
             $this->funcionario->setIdPessoa($this->pessoa->getId());
             $this->funcionario->setCargo($dados['cargo'] ?? null);
-            $this->funcionario->setSalario($dados['salario'] ?? null);
+            $this->funcionario->setSalario(
+                isset($dados['salario']) && $dados['salario'] !== '' 
+                    ? (float)$dados['salario'] 
+                    : null
+            );
             $this->funcionario->setDataContratacao($dados['data_contratacao'] ?? date('Y-m-d'));
-            $this->funcionario->setNumeroCtps($dados['numero_ctps'] ?? null);
+            $this->funcionario->setNumeroCtps(
+                isset($dados['numero_ctps']) && $dados['numero_ctps'] !== '' 
+                    ? (int)$dados['numero_ctps'] 
+                    : null
+            );
             $this->funcionario->setTurno($dados['turno'] ?? null);
 
-            $erros = $this->funcionario->validar();
-            if (!empty($erros)) {
+            // Validar funcionário
+            $errosFuncionario = $this->funcionario->validar();
+            if (!empty($errosFuncionario)) {
                 $this->db->rollBack();
-                return ['sucesso' => false, 'erros' => $erros];
+                return ['sucesso' => false, 'erros' => $errosFuncionario];
             }
 
             if (!$this->funcionario->create()) {
@@ -72,11 +97,13 @@ class FuncionarioController {
             }
 
             $this->db->commit();
+
             return [
-                'sucesso' => true, 
+                'sucesso' => true,
                 'mensagem' => 'Funcionário criado com sucesso!',
                 'id' => $this->pessoa->getId()
             ];
+
         } catch (Exception $e) {
             $this->db->rollBack();
             return ['sucesso' => false, 'erros' => ['Erro: ' . $e->getMessage()]];
@@ -89,7 +116,7 @@ class FuncionarioController {
             $funcionarios = $stmt->fetchAll(PDO::FETCH_ASSOC);
             return ['sucesso' => true, 'dados' => $funcionarios];
         } catch (Exception $e) {
-            return ['sucesso' => false, 'erros' => ['Erro: ' . $e->getMessage()]];
+            return ['sucesso' => false, 'erros' => ['Erro ao listar: ' . $e->getMessage()]];
         }
     }
 

@@ -5,6 +5,10 @@ require_once __DIR__ . '/../database/Database.php';
 require_once __DIR__ . '/../utils/Validacoes.php';
 require_once __DIR__ . '/../utils/Formatter.php';
 
+use Controller\HospedeController;
+
+session_start();
+
 $mensagem = '';
 $erros = [];
 
