@@ -8,5 +8,6 @@ include __DIR__ . '/seed_pessoas.php';
 include __DIR__ . '/seed_hospedes.php';
 include __DIR__ . '/seed_quartos.php';
 include __DIR__ . '/seed_reservas.php';
+include __DIR__ . '/seed_item.php';
 
 echo "Povoamento finalizado!\n";
