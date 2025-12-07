@@ -138,6 +138,22 @@ min-height: 100vh;
                     </div>
                 </div>
             </div>
+            
+            <!-- RELATÓRIOS -->
+            <div class="col-md-6 col-lg-3">
+                <div class="card menu-card border-0 shadow">
+                    <div class="card-body text-center p-4">
+                        <i class="bi bi-file-earmark-text text-primary menu-icon"></i>
+                        <h4 class="card-title">Relatórios</h4>
+                        <p class="card-text text-muted">Acesse relatórios e dashboards</p>
+                        <div class="d-grid gap-2">
+                            <a href="view/relatorios/index.php" class="btn btn-primary">
+                                <i class="bi bi-bar-chart-line"></i> Abrir Relatórios
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
         
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>

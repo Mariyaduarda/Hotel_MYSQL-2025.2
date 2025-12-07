@@ -1,10 +1,10 @@
 <?php
-require_once __DIR__ . '/../controller/RelatorioController.php';
+require_once __DIR__ . '/../../controller/RelatorioController.php';
 require_once __DIR__ . '/../utils/Formatter.php';
 
 use Controller\RelatorioController;
 
-$controller = new RelatorioController();
+$controller = class_exists('\Controller\\RelatorioController') ? new RelatorioController() : null;
 
 // Buscar dados do dashboard
 $dashboard = $controller->dashboard();
